@@ -65,7 +65,7 @@ def remove_user_ingredients():
     pass
 
 # Get Possible Cocktails
-@app.route('user/<user_id>/cocktails')
+@app.route('/user/<user_id>/cocktails')
 def get_possible_cocktails():
     pass
 
@@ -156,6 +156,16 @@ def like_cocktail():
 def dislike_cocktail():
     pass
 
+# Get Liked Cocktails
+@app.route('/user/<user_id>/cocktails/likes')
+def get_liked_cocktails():
+    pass
+
+# Get Disliked Cocktails
+@app.route('/user/<user_id>/cocktails/dislikes')
+def get_disliked_cocktails():
+    pass
+
 # Favorite Cocktail
 @app.route('/user/<user_id>/cocktails/favorite')
 def favorite_cocktail():
@@ -166,7 +176,7 @@ def favorite_cocktail():
 def unfavorite_cocktail():
     pass
 
-# Get favorited Cocktails
+# Get Favorited Cocktails
 @app.route('/user/<user_id>/cocktails/favorites')
 def get_favorited_cocktails():
     pass
