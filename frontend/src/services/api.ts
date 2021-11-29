@@ -2,15 +2,36 @@
 
 const BACKEND_URL = "http://localhost:5000";
 
+// ERROR CODES
+// ------------
+
+export const ERROR_CODES = {
+    460: 'Email Taken'
+    461: 'Email Not Found'
+}
+
 // Types
 // ------
 
-export type loginResponse = {
-    userID: string;
-    status: "Success";
-} | {
-    error: string;
+export type Failure = {
+    errorCode: number,
     status: "Failure"
+}
+
+export type LoginResponse = {
+    firstName: string;
+    lastName: string;
+    status: "Success";
+} | Failure
+
+export type LogoutResponse = {
+    status: "Success";
+} | Failure
+
+export type UserInfo = {
+    userID: string;
+    firstName: string;
+    lastName: string;
 }
 
 export type Ingredient = {
@@ -36,42 +57,65 @@ export type Cocktail = {
 
 // Store User ID
 export function setUserID(userID: string): void {
-    localStorage.setItem('user_id', userID)
+    localStorage.setItem('user_id', userID);
 }
 
 // Get User ID
 export function getUserID(): string {
-    return localStorage.getItem("userID") || "";
+    return localStorage.getItem("user_id") || "";
 }
 
 // Signup
-export async function signup(email: string, password: string) {
+export async function signup(email: string, password: string, firstName: string, lastName: string): Promise<LoginResponse> {
     const resp = await fetch(`${BACKEND_URL}/signup`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({email: email, password: password})
+        body: JSON.stringify({email: email, password: password, firstName: firstName, lastName: lastName})
     });
+
+    if(resp.ok) {
+        const resp_data: {userID: string} = await resp.json();
+        setUserID(resp_data.userID)
+        return {firstName: firstName, lastName: lastName, status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"}
+    }
 }
 
 // Login
-export async function login(email: string, password: string) {
+export async function login(email: string, password: string): Promise<LoginResponse> {
     const resp = await fetch(`${BACKEND_URL}/login`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email: email, password: password})
     });
+
+    if(resp.ok) {
+        const resp_data: UserInfo = await resp.json();
+        setUserID(resp_data.userID)
+        return {firstName: resp_data.firstName, lastName: resp_data.lastName, status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"}
+    }
 }
 
 // Logout
-export async function logout() {
+export async function logout(): Promise<LogoutResponse> {
     const resp = await fetch(`${BACKEND_URL}/logout`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({userID: getUserID()})
     });
+
+    if(resp.ok) {
+        setUserID("");
+        return {status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"}
+    }
 }
 
 // Delete Account
