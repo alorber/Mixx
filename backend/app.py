@@ -38,7 +38,7 @@ def signup():
     signup_info = request.get_json()
 
     # Check that email isn't taken
-    user = cocktail_db.find_one({"email": signup_info['email']})
+    user = user_db.find_one({"email": signup_info['email']})
     if user != None:
         # ERROR: Email already taken
         return {}, 460
@@ -59,7 +59,7 @@ def login():
     login_info = request.get_json()
 
     # Query for user with given email
-    user = cocktail_db.find_one({"email": login_info['email']})
+    user = user_db.find_one({"email": login_info['email']})
     if user == None:
         # ERROR: Email not found
         return {}, 461
@@ -90,8 +90,28 @@ def logout():
 
 # Delete Account
 @app.route('/user/<user_id>/delete', methods=['POST'])
-def delete_account():
-    pass
+def delete_account(user_id):
+    # Check authorization
+    if session.get('user_id', None) != user_id:
+        # ERROR: Unauthorized
+        return {}, 401
+    
+    # Check password
+    hashed_password = user_db.find_one({"_id": user_id})['password']
+    password = request.get_json()['password']
+    if not bcrypt.check_password_hash(hashed_password, password):
+        # ERROR: Incorrect Password
+        return {}, 462
+    
+    # Delete User
+    delete_result = user_db.delete_one({'_id': user_id})
+
+    if delete_result.deleted_count > 0:
+        session.pop('user_id', None)
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Update Email
 @app.route('/user/<user_id>/updateEmail', methods=['POST'])

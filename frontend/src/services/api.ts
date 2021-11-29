@@ -25,7 +25,7 @@ export type LoginResponse = {
     status: "Success";
 } | Failure
 
-export type LogoutResponse = {
+export type StatusResponse = {
     status: "Success";
 } | Failure
 
@@ -103,7 +103,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 }
 
 // Logout
-export async function logout(): Promise<LogoutResponse> {
+export async function logout(): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/logout`, {
         method: 'POST',
         mode: 'cors',
@@ -120,13 +120,20 @@ export async function logout(): Promise<LogoutResponse> {
 }
 
 // Delete Account
-export async function deleteAccount(password: string) {
+export async function deleteAccount(password: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/delete`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({password: password})
     });
+
+    if(resp.ok) {
+        setUserID("");
+        return {status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"}
+    }
 }
 
 // Update Email
