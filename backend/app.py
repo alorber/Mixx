@@ -1,4 +1,5 @@
-from flask import Flask, redirect, url_for
+from flask import Flask, request
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -10,6 +11,7 @@ from functools import cmp_to_key
 app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
+bcrypt = Bcrypt(app)
 
 # ------ MongoDB Setup ------
 client = MongoClient(f"mongodb+srv://{USERNAME}:{PASSWORD}@mixx.eggih.mongodb.net/Mixx?retryWrites=true&w=majority")
@@ -20,67 +22,67 @@ ingr_db = db.Ingredients
 # ------ Routing ------
 
 # Signup
-@app.route('/signup')
+@app.route('/signup', methods=['POST'])
 def signup():
     pass
 
 # Login
-@app.route('/login')
+@app.route('/login', methods=['POST'])
 def login():
     pass
 
 # Logout
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
 def logout():
     pass
 
 # Delete Account
-@app.route('/user/<user_id>/delete')
+@app.route('/user/<user_id>/delete', methods=['POST'])
 def delete_account():
     pass
 
 # Update Email
-@app.route('/user/<user_id>/updateEmail')
+@app.route('/user/<user_id>/updateEmail', methods=['POST'])
 def update_email():
     pass
 
 # Update Password
-@app.route('/user/<user_id>/updatePassword')
+@app.route('/user/<user_id>/updatePassword', methods=['POST'])
 def update_password():
     pass
 
 # Get Current User's Ingredients
-@app.route('/user/<user_id>/ingredients')
+@app.route('/user/<user_id>/ingredients', methods=['Get'])
 def get_user_ingredients():
     pass
 
 # Add Ingredients
-@app.route('/user/<user_id>/ingredients/add')
+@app.route('/user/<user_id>/ingredients/add', methods=['POST'])
 def add_user_ingredients():
     pass
 
 # Remove Ingredients
-@app.route('/user/<user_id>/ingredients/remove')
+@app.route('/user/<user_id>/ingredients/remove', methods=['POST'])
 def remove_user_ingredients():
     pass
 
 # Get Possible Cocktails
-@app.route('/user/<user_id>/cocktails')
+@app.route('/user/<user_id>/cocktails', methods=['Get'])
 def get_possible_cocktails():
     pass
 
 # Get All Cocktails (Display Info)
-@app.route('/cocktails')
+@app.route('/cocktails', methods=['Get'])
 def get_all_cocktails():
     return list(cocktail_db.find({}, {'name': 1, 'img': 1, 'subtitle': 1, '_id': 1}))
 
 # Get Specific Cocktail's Info
-@app.route('/cocktails/<cocktail_id>')
+@app.route('/cocktails/<cocktail_id>', methods=['Get'])
 def get_cocktail_info(cocktail_id):
     return cocktail_db.find_one({"_id": cocktail_id})
 
 # Get Cocktails Containing Ingredient
-@app.route('/cocktails/containing/<ingredient_id>')
+@app.route('/cocktails/containing/<ingredient_id>', methods=['Get'])
 def get_cocktail_containing(ingredient_id):
     return list(cocktail_db.aggregate([
         {
@@ -101,7 +103,7 @@ def get_cocktail_containing(ingredient_id):
     ]))
 
 # Get Categorized Ingredients
-@app.route('/ingredients/categorized')
+@app.route('/ingredients/categorized', methods=['Get'])
 def get_categorized_ingredients():
     ingr_query_resp = list(ingr_db.aggregate([
         {
@@ -147,37 +149,37 @@ def get_categorized_ingredients():
     return categorized_ingr
 
 # Like Cocktail
-@app.route('/user/<user_id>/cocktails/like')
+@app.route('/user/<user_id>/cocktails/like', methods=['POST'])
 def like_cocktail():
     pass
 
 # Dislike Cocktail
-@app.route('/user/<user_id>/cocktails/dislike')
+@app.route('/user/<user_id>/cocktails/dislike', methods=['POST'])
 def dislike_cocktail():
     pass
 
 # Get Liked Cocktails
-@app.route('/user/<user_id>/cocktails/likes')
+@app.route('/user/<user_id>/cocktails/likes', methods=['Get'])
 def get_liked_cocktails():
     pass
 
 # Get Disliked Cocktails
-@app.route('/user/<user_id>/cocktails/dislikes')
+@app.route('/user/<user_id>/cocktails/dislikes', methods=['Get'])
 def get_disliked_cocktails():
     pass
 
 # Favorite Cocktail
-@app.route('/user/<user_id>/cocktails/favorite')
+@app.route('/user/<user_id>/cocktails/favorite', methods=['POST'])
 def favorite_cocktail():
     pass
 
 # Unfavorite Cocktail
-@app.route('/user/<user_id>/cocktails/unfavorite')
+@app.route('/user/<user_id>/cocktails/unfavorite', methods=['POST'])
 def unfavorite_cocktail():
     pass
 
 # Get Favorited Cocktails
-@app.route('/user/<user_id>/cocktails/favorites')
+@app.route('/user/<user_id>/cocktails/favorites', methods=['Get'])
 def get_favorited_cocktails():
     pass
 

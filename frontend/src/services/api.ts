@@ -114,14 +114,20 @@ export async function getCurrentUserIngredients() {
 // Add Ingredients
 export async function addUserIngredients(newIngredients: [Ingredient]) {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/add`, {
-        method: 'GET'
+        method: 'POST',
+        mode: 'cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({newIngredients: newIngredients})
     });
 }
 
 // Remove Ingredients
 export async function removeUserIngredients(removedIngredients: [Ingredient]) {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/remove`, {
-        method: 'GET'
+        method: 'POST',
+        mode: 'cors',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({removedIngredients: removedIngredients})
     });
 }
 
