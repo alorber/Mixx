@@ -6,8 +6,9 @@ const BACKEND_URL = "http://localhost:5000";
 // ------------
 
 export const ERROR_CODES = {
-    460: 'Email Taken'
-    461: 'Email Not Found'
+    460: 'Email Taken',
+    461: 'Email Not Found',
+    462: 'Incorrect Password'
 }
 
 // Types
