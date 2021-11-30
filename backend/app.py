@@ -38,7 +38,7 @@ def signup():
     signup_info = request.get_json()
 
     # Check that email isn't taken
-    user = user_db.find_one({"email": signup_info['email']})
+    user = user_db.find_one({"email": signup_info['email']}, {'_id': 1})
     if user != None:
         # ERROR: Email already taken
         return {}, 460
@@ -59,7 +59,8 @@ def login():
     login_info = request.get_json()
 
     # Query for user with given email
-    user = user_db.find_one({"email": login_info['email']})
+    fields = ['_id', 'password', 'first_name', 'last_name']
+    user = user_db.find_one({"email": login_info['email']}, {field: 1 for field in fields})
     if user == None:
         # ERROR: Email not found
         return {}, 461
@@ -97,7 +98,7 @@ def delete_account(user_id):
         return {}, 401
     
     # Check password
-    hashed_password = user_db.find_one({"_id": user_id})['password']
+    hashed_password = user_db.find_one({"_id": user_id}, {'password': 1})['password']
     password = request.get_json()['password']
     if not bcrypt.check_password_hash(hashed_password, password):
         # ERROR: Incorrect Password
