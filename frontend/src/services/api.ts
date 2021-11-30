@@ -369,28 +369,47 @@ export async function getDislikedCocktails(): Promise<{cocktails: [Cocktail]} | 
 }
 
 // Favorite Cocktail
-export async function favoriteCocktail(cocktailID: string) {
+export async function favoriteCocktail(cocktailID: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/favorite`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Unfavorite Cocktail
-export async function unfavoriteCocktail(cocktailID: string) {
+export async function unfavoriteCocktail(cocktailID: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/unfavorite`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Favorited Cocktails
-export async function getFavoritedCocktails() {
+export async function getFavoritedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/favorites`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        return {cocktails: resp_data.cocktails}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }

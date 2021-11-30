@@ -423,18 +423,52 @@ def get_disliked_cocktails(user_id):
 
 # Favorite Cocktail
 @app.route('/user/<user_id>/cocktails/favorite', methods=['POST'])
-def favorite_cocktail():
-    pass
+def favorite_cocktail(user_id):
+    favorited_cocktail = ObjectId(request.get_json()['cocktailID'])
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$addToSet': {'favorite_cocktails': favorited_cocktail}})
+    
+     # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Unfavorite Cocktail
 @app.route('/user/<user_id>/cocktails/unfavorite', methods=['POST'])
-def unfavorite_cocktail():
-    pass
+def unfavorite_cocktail(user_id):
+    unfavorited_cocktail = ObjectId(request.get_json()['cocktailID'])
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$pull': {'favorite_cocktails': unfavorited_cocktail}})
+     # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Get Favorited Cocktails
 @app.route('/user/<user_id>/cocktails/favorites', methods=['Get'])
-def get_favorited_cocktails():
-    pass
+def get_favorited_cocktails(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+    
+    favorite_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'favorite_cocktails': 1})['favorite_cocktails']
+
+    return {'cocktails': favorite_cocktails}, 200
 
 if __name__ == "__main__":
     app.run(debug=True)
