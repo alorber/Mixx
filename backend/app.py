@@ -204,20 +204,48 @@ def update_user_ingredients(user_id):
      # Check for success
     if update_resp.modified_count > 0:
         ingredients = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
-        return {'Ingredients': ingredients}, 200
+        return {'ingredients': ingredients}, 200
     else:
         # Database Error
         return {}, 500
 
 # Get Possible Cocktails
 @app.route('/user/<user_id>/cocktails', methods=['Get'])
-def get_possible_cocktails():
-    pass
+def get_possible_cocktails(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
 
-# Get All Cocktails (Display Info)
+    # Get Ingredients
+    ingredients = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
+
+    if len(ingredients) == 0:
+        return {'cocktails': []}, 200
+    
+    # Get Cocktails
+    cocktails = list(cocktail_db.aggregate([
+        {
+            "$match": {
+                "$expr": {
+                    "$setIsSubset": [{
+                        "$map": {
+                            "input": "$ingredients",
+                            "as": "ingredient",
+                            "in": "$$ingredient.ingredient"
+                        }
+                    }, ingredients]
+                }
+            }
+        }
+    ]))
+    
+    return {'cocktails': cocktails}, 200
+
+# Get All Cocktails
 @app.route('/cocktails', methods=['Get'])
 def get_all_cocktails():
-    return list(cocktail_db.find({}, {'name': 1, 'img': 1, 'subtitle': 1, '_id': 1})), 200
+    return {'cocktails': list(cocktail_db.find({}))}, 200
 
 # Get Specific Cocktail's Info
 @app.route('/cocktails/<cocktail_id>', methods=['Get'])

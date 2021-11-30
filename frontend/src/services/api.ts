@@ -169,21 +169,21 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
 }
 
 // Get Current User Ingredients
-export async function getCurrentUserIngredients(): Promise<{'Ingredients': [Ingredient]} | Failure> {
+export async function getCurrentUserIngredients(): Promise<{ingredients: [Ingredient]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients`, {
         method: 'GET'
     });
 
     if(resp.ok) {
-        const resp_data: {'Ingredients': [Ingredient]} = await resp.json();
-        return {'Ingredients': resp_data.Ingredients}
+        const resp_data: {ingredients: [Ingredient]} = await resp.json();
+        return {ingredients: resp_data.ingredients}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Update User Ingredients
-export async function updateUserIngredients(newIngredients: [Ingredient], removedIngredients: [Ingredient]): Promise<{'Ingredients': [Ingredient]} | Failure> {
+export async function updateUserIngredients(newIngredients: [Ingredient], removedIngredients: [Ingredient]): Promise<{ingredients: [Ingredient]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/update`, {
         method: 'POST',
         mode: 'cors',
@@ -192,25 +192,39 @@ export async function updateUserIngredients(newIngredients: [Ingredient], remove
     });
 
     if(resp.ok) {
-        const resp_data: {'Ingredients': [Ingredient]} = await resp.json();
-        return {'Ingredients': resp_data.Ingredients}
+        const resp_data: {ingredients: [Ingredient]} = await resp.json();
+        return {ingredients: resp_data.ingredients}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Get Possible Cocktails
-export async function getPossibleCocktails() {
+export async function getPossibleCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        return {cocktails: resp_data.cocktails}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
-// Get All Cocktails' Display Info
-export async function getAllCocktailsInfo() {
+// Get All Cocktails
+export async function getAllCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        return {cocktails: resp_data.cocktails}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Cocktail's Info
