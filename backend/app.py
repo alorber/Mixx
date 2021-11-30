@@ -195,10 +195,13 @@ def update_user_ingredients(user_id):
     if not is_auth_user(user_id):
         # ERROR: Unauthorized
         return {}, 401
+
+    new_ingredients = [ObjectId(ingr_id) for ingr_id in update_info['newIngredients']]
+    removed_ingredients = [ObjectId(ingr_id) for ingr_id in update_info['removedIngredients']]
     
     update_resp = user_db.update_one({'_id': ObjectId(user_id)}, [
-        {'$addToSet': {'ingredients': {'$each': update_info['newIngredients']}}},
-        {'$pull': {'ingredients': {'$in': update_info['removedIngredients']}}}
+        {'$addToSet': {'ingredients': {'$each': new_ingredients}}},
+        {'$pull': {'ingredients': {'$in': removed_ingredients}}}
         ])
     
      # Check for success
@@ -255,12 +258,13 @@ def get_cocktail_info(cocktail_id):
 # Get Cocktails Containing Ingredient
 @app.route('/cocktails/containing/<ingredient_id>', methods=['Get'])
 def get_cocktail_containing(ingredient_id):
+    ingr_id = ObjectId(ingredient_id)
     return {'cocktails': list(cocktail_db.aggregate([
         {
             "$match": {
                 "$expr": {
                     "$in": [
-                        ingredient_id,
+                        ingr_id,
                         {"$map": {
                                 "input": "$ingredients",
                                 "as": "ingredient",
@@ -321,23 +325,101 @@ def get_categorized_ingredients():
 
 # Like Cocktail
 @app.route('/user/<user_id>/cocktails/like', methods=['POST'])
-def like_cocktail():
-    pass
+def like_cocktail(user_id):
+    liked_cocktail = ObjectId(request.get_json()['cocktailID'])
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$addToSet': {'liked_cocktails': liked_cocktail}})
+    
+     # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
+
+# Removed Liked Cocktail
+@app.route('/user/<user_id>/cocktails/remove_like', methods=['POST'])
+def remove_liked_cocktail(user_id):
+    unliked_cocktail = ObjectId(request.get_json()['cocktailID'])
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$pull': {'liked_cocktails': unliked_cocktail}})
+     # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Dislike Cocktail
 @app.route('/user/<user_id>/cocktails/dislike', methods=['POST'])
-def dislike_cocktail():
-    pass
+def dislike_cocktail(user_id):
+    disliked_cocktail = ObjectId(request.get_json()['cocktailID'])
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$addToSet': {'disliked_cocktails': disliked_cocktail}})
+    
+     # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
+
+# Removed Liked Cocktail
+@app.route('/user/<user_id>/cocktails/remove_dislike', methods=['POST'])
+def remove_disliked_cocktail(user_id):
+    undisliked_cocktail = ObjectId(request.get_json()['cocktailID'])
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$pull': {'disliked_cocktails': undisliked_cocktail}})
+     # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Get Liked Cocktails
 @app.route('/user/<user_id>/cocktails/likes', methods=['Get'])
-def get_liked_cocktails():
-    pass
+def get_liked_cocktails(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    liked_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'liked_cocktails': 1})['liked_cocktails']
+
+    return {'cocktails': liked_cocktails}, 200
 
 # Get Disliked Cocktails
 @app.route('/user/<user_id>/cocktails/dislikes', methods=['Get'])
-def get_disliked_cocktails():
-    pass
+def get_disliked_cocktails(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    disliked_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'disliked_cocktails': 1})['disliked_cocktails']
+
+    return {'cocktails': disliked_cocktails}, 200
 
 # Favorite Cocktail
 @app.route('/user/<user_id>/cocktails/favorite', methods=['POST'])

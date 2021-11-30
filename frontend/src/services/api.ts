@@ -277,23 +277,67 @@ export async function getCategorizedIngredients(): Promise<{ingredients: Categor
 }
 
 // Like Cocktail
-export async function likeCocktail(cocktailID: string) {
+export async function likeCocktail(cocktailID: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/like`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Unlike Cocktail
+export async function removeLikedCocktail(cocktailID: string): Promise<StatusResponse> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/remove_like`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {'Content-Type': 'application/jaon'},
+        body: JSON.stringify({cocktailID: cocktailID})
+    });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Dislike Cocktail
-export async function dislikeCocktail(cocktailID: string) {
+export async function dislikeCocktail(cocktailID: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/dislike`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Undislike Cocktail
+export async function removeDislikedCocktail(cocktailID: string): Promise<StatusResponse> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/remove_dislike`, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {'Content-Type': 'application/jaon'},
+        body: JSON.stringify({cocktailID: cocktailID})
+    });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Liked Cocktails
