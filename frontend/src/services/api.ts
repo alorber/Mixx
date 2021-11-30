@@ -78,9 +78,9 @@ export async function signup(email: string, password: string, firstName: string,
     if(resp.ok) {
         const resp_data: {userID: string} = await resp.json();
         setUserID(resp_data.userID)
-        return {firstName: firstName, lastName: lastName, status: "Success"}
+        return {firstName: firstName, lastName: lastName, status: "Success"};
     } else {
-        return {errorCode: resp.status, status: "Failure"}
+        return {errorCode: resp.status, status: "Failure"};
     }
 }
 
@@ -95,10 +95,10 @@ export async function login(email: string, password: string): Promise<LoginRespo
 
     if(resp.ok) {
         const resp_data: UserInfo = await resp.json();
-        setUserID(resp_data.userID)
-        return {firstName: resp_data.firstName, lastName: resp_data.lastName, status: "Success"}
+        setUserID(resp_data.userID);
+        return {firstName: resp_data.firstName, lastName: resp_data.lastName, status: "Success"};
     } else {
-        return {errorCode: resp.status, status: "Failure"}
+        return {errorCode: resp.status, status: "Failure"};
     }
 }
 
@@ -113,9 +113,9 @@ export async function logout(): Promise<StatusResponse> {
 
     if(resp.ok) {
         setUserID("");
-        return {status: "Success"}
+        return {status: "Success"};
     } else {
-        return {errorCode: resp.status, status: "Failure"}
+        return {errorCode: resp.status, status: "Failure"};
     }
 }
 
@@ -130,37 +130,56 @@ export async function deleteAccount(password: string): Promise<StatusResponse> {
 
     if(resp.ok) {
         setUserID("");
-        return {status: "Success"}
+        return {status: "Success"};
     } else {
-        return {errorCode: resp.status, status: "Failure"}
+        return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Update Email
-export async function updateEmail(newEmail: string, password: string) {
+export async function updateEmail(newEmail: string, password: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/updateEmail`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({newEmail: newEmail, password: password})
     });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Update Password
-export async function updatePassword(oldPassword: string, newPassword: string) {
+export async function updatePassword(oldPassword: string, newPassword: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/updatePassword`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({oldPassword: oldPassword, newPassword: newPassword})
     });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Current User Ingredients
-export async function getCurrentUserIngredients() {
+export async function getCurrentUserIngredients(): Promise<{'Ingredients': [Ingredient]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {'Ingredients': [Ingredient]} = await resp.json();
+        return {'Ingredients': resp_data.Ingredients}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Add Ingredients

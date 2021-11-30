@@ -177,8 +177,14 @@ def update_password(user_id):
 
 # Get Current User's Ingredients
 @app.route('/user/<user_id>/ingredients', methods=['Get'])
-def get_user_ingredients():
-    pass
+def get_user_ingredients(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    ingredients = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
+    return {'ingredients': ingredients}, 200
 
 # Add Ingredients
 @app.route('/user/<user_id>/ingredients/add', methods=['POST'])
