@@ -22,6 +22,9 @@ cocktail_db = db.Cocktails
 ingr_db = db.Ingredients
 user_db = db.Users
 
+# ------ Helper Functions ------
+
+# Creates new user document for DB
 def create_user(email, password_hash, first_name, last_name):
     return {
         'email': email,
@@ -29,6 +32,16 @@ def create_user(email, password_hash, first_name, last_name):
         'first_name': first_name,
         'last_name': last_name
     }
+
+# Checks if user is authorized for action (Cookies match)
+def is_auth_user(user_id):
+    return session.get('user_id', None) == user_id
+
+# Queries for password hash and checks against received password
+# Returns true if match
+def get_check_password(user_id, password):
+    hashed_password = user_db.find_one({"_id": ObjectId(user_id)}, {'password': 1})['password']
+    return bcrypt.check_password_hash(hashed_password, password)
 
 # ------ Routing ------
 
@@ -80,8 +93,8 @@ def login():
 def logout():
     user_id = request.get_json()['userID']
 
-    # Check cookie
-    if session.get('user_id', None) == user_id:
+    # Check authorization
+    if is_auth_user(user_id):
         # Delete Session
         session.pop('user_id', None)
         return {}, 200
@@ -93,20 +106,19 @@ def logout():
 @app.route('/user/<user_id>/delete', methods=['POST'])
 def delete_account(user_id):
     # Check authorization
-    if session.get('user_id', None) != user_id:
+    if not is_auth_user(user_id):
         # ERROR: Unauthorized
         return {}, 401
     
     # Check password
-    hashed_password = user_db.find_one({"_id": user_id}, {'password': 1})['password']
-    password = request.get_json()['password']
-    if not bcrypt.check_password_hash(hashed_password, password):
+    if not get_check_password(user_id, request.get_json()['password']):
         # ERROR: Incorrect Password
         return {}, 462
     
     # Delete User
-    delete_result = user_db.delete_one({'_id': user_id})
+    delete_result = user_db.delete_one({'_id': ObjectId(user_id)})
 
+    # Check for success
     if delete_result.deleted_count > 0:
         session.pop('user_id', None)
         return {}, 200
@@ -116,13 +128,52 @@ def delete_account(user_id):
 
 # Update Email
 @app.route('/user/<user_id>/updateEmail', methods=['POST'])
-def update_email():
-    pass
+def update_email(user_id):
+    update_info = request.get_json()
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    # Check password
+    if not get_check_password(user_id, update_info['password']):
+        # ERROR: Incorrect Password
+        return {}, 462
+
+    # Update
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$set': {'email': update_info['newEmail']}})
+
+    # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Update Password
 @app.route('/user/<user_id>/updatePassword', methods=['POST'])
-def update_password():
-    pass
+def update_password(user_id):
+    update_info = request.get_json()
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    # Check password
+    if not get_check_password(user_id, update_info['oldPassword']):
+        # ERROR: Incorrect Password
+        return {}, 462
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': update_info['newPassword']}})
+
+    # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Get Current User's Ingredients
 @app.route('/user/<user_id>/ingredients', methods=['Get'])
@@ -152,7 +203,7 @@ def get_all_cocktails():
 # Get Specific Cocktail's Info
 @app.route('/cocktails/<cocktail_id>', methods=['Get'])
 def get_cocktail_info(cocktail_id):
-    return cocktail_db.find_one({"_id": cocktail_id}), 200
+    return cocktail_db.find_one({"_id": ObjectId(cocktail_id)}), 200
 
 # Get Cocktails Containing Ingredient
 @app.route('/cocktails/containing/<ingredient_id>', methods=['Get'])
