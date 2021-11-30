@@ -228,10 +228,17 @@ export async function getAllCocktails(): Promise<{cocktails: [Cocktail]} | Failu
 }
 
 // Get Cocktail's Info
-export async function getCocktailInfo(cocktailID: string) {
+export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/${cocktailID}`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {cocktail: Cocktail} = await resp.json();
+        return resp_data.cocktail
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Cocktails Containing Ingredient
