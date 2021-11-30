@@ -186,15 +186,28 @@ def get_user_ingredients(user_id):
     ingredients = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
     return {'ingredients': ingredients}, 200
 
-# Add Ingredients
-@app.route('/user/<user_id>/ingredients/add', methods=['POST'])
-def add_user_ingredients():
-    pass
+# Update User Ingredients
+@app.route('/user/<user_id>/ingredients/update', methods=['POST'])
+def update_user_ingredients(user_id):
+    update_info = request.get_json()
 
-# Remove Ingredients
-@app.route('/user/<user_id>/ingredients/remove', methods=['POST'])
-def remove_user_ingredients():
-    pass
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+    
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, [
+        {'$addToSet': {'ingredients': {'$each': update_info['newIngredients']}}},
+        {'$pull': {'ingredients': {'$in': update_info['removedIngredients']}}}
+        ])
+    
+     # Check for success
+    if update_resp.modified_count > 0:
+        ingredients = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
+        return {'Ingredients': ingredients}, 200
+    else:
+        # Database Error
+        return {}, 500
 
 # Get Possible Cocktails
 @app.route('/user/<user_id>/cocktails', methods=['Get'])

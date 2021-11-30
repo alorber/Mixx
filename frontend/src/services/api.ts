@@ -182,24 +182,21 @@ export async function getCurrentUserIngredients(): Promise<{'Ingredients': [Ingr
     }
 }
 
-// Add Ingredients
-export async function addUserIngredients(newIngredients: [Ingredient]) {
-    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/add`, {
+// Update User Ingredients
+export async function updateUserIngredients(newIngredients: [Ingredient], removedIngredients: [Ingredient]): Promise<{'Ingredients': [Ingredient]} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/update`, {
         method: 'POST',
         mode: 'cors',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({newIngredients: newIngredients})
+        body: JSON.stringify({newIngredients: newIngredients, removedIngredients: removedIngredients})
     });
-}
 
-// Remove Ingredients
-export async function removeUserIngredients(removedIngredients: [Ingredient]) {
-    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/remove`, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({removedIngredients: removedIngredients})
-    });
+    if(resp.ok) {
+        const resp_data: {'Ingredients': [Ingredient]} = await resp.json();
+        return {'Ingredients': resp_data.Ingredients}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Possible Cocktails
