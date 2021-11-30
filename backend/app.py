@@ -255,7 +255,7 @@ def get_cocktail_info(cocktail_id):
 # Get Cocktails Containing Ingredient
 @app.route('/cocktails/containing/<ingredient_id>', methods=['Get'])
 def get_cocktail_containing(ingredient_id):
-    return list(cocktail_db.aggregate([
+    return {'cocktails': list(cocktail_db.aggregate([
         {
             "$match": {
                 "$expr": {
@@ -271,7 +271,7 @@ def get_cocktail_containing(ingredient_id):
                 }
             }
         }
-    ])), 200
+    ]))}, 200
 
 # Get Categorized Ingredients
 @app.route('/ingredients/categorized', methods=['Get'])

@@ -242,10 +242,17 @@ export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Fa
 }
 
 // Get Cocktails Containing Ingredient
-export async function getCocktailContaining(ingredientID: string) {
+export async function getCocktailContaining(ingredientID: string): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/containing/${ingredientID}`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        return {cocktails: resp_data.cocktails}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Categorized Ingredients
