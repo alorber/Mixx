@@ -9,7 +9,7 @@ export const ERROR_CODES = {
     460: 'Email Taken',
     461: 'Email Not Found',
     462: 'Incorrect Password'
-}
+};
 
 // Types
 // ------
@@ -17,30 +17,37 @@ export const ERROR_CODES = {
 export type Failure = {
     errorCode: number,
     status: "Failure"
-}
+};
 
 export type LoginResponse = {
     firstName: string;
     lastName: string;
     status: "Success";
-} | Failure
+} | Failure;
 
 export type StatusResponse = {
     status: "Success";
-} | Failure
+} | Failure;
 
 export type UserInfo = {
     userID: string;
     firstName: string;
     lastName: string;
-}
+};
 
 export type Ingredient = {
     _id: string;
     name: string;
     category: string;
     subcategory: string;
-}
+};
+
+type CATEGORIES = 'Spirits' | 'Liqueurs' | 'Wines and Champagnes' | 'Beers and Ciders' | 'Mixers' | 'Other';
+export type CategorizedIngredients = {
+   [key in CATEGORIES]: {
+       [key: string]: [string]
+   }
+};
 
 export type Cocktail = {
     _id: string;
@@ -256,10 +263,17 @@ export async function getCocktailContaining(ingredientID: string): Promise<{cock
 }
 
 // Get Categorized Ingredients
-export async function getCategorizedIngredients() {
+export async function getCategorizedIngredients(): Promise<{ingredients: CategorizedIngredients} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/ingredients/categorized`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {ingredients: CategorizedIngredients} = await resp.json();
+        return {ingredients: resp_data.ingredients}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Like Cocktail

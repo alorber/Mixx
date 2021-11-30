@@ -317,7 +317,7 @@ def get_categorized_ingredients():
         for subcategory in subcategories:
             categorized_ingr[category][subcategory['subcategory']] = sorted(subcategory['ingredients'], key=cmp_to_key(sort_ingr))
 
-    return categorized_ingr, 200
+    return {'ingredients': categorized_ingr}, 200
 
 # Like Cocktail
 @app.route('/user/<user_id>/cocktails/like', methods=['POST'])
