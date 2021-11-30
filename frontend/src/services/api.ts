@@ -341,17 +341,31 @@ export async function removeDislikedCocktail(cocktailID: string): Promise<Status
 }
 
 // Get Liked Cocktails
-export async function getLikedCocktails() {
+export async function getLikedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/likes`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        return {cocktails: resp_data.cocktails}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Get Disliked Cocktails
-export async function getDislikedCocktails() {
+export async function getDislikedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/dislikes`, {
         method: 'GET'
     });
+
+    if(resp.ok) {
+        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        return {cocktails: resp_data.cocktails}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
 }
 
 // Favorite Cocktail
