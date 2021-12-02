@@ -73,11 +73,17 @@ export function getUserID(): string {
     return localStorage.getItem("user_id") || "";
 }
 
+// Checks if user is logged in
+export function isLoggedIn(): boolean {
+    return getUserID() !== '';
+}
+
 // Signup
 export async function signup(email: string, password: string, firstName: string, lastName: string): Promise<LoginResponse> {
     const resp = await fetch(`${BACKEND_URL}/signup`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email: email, password: password, firstName: firstName, lastName: lastName})
     });
@@ -96,6 +102,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
     const resp = await fetch(`${BACKEND_URL}/login`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({email: email, password: password})
     });
@@ -114,6 +121,7 @@ export async function logout(): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/logout`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({userID: getUserID()})
     });
@@ -131,6 +139,7 @@ export async function deleteAccount(password: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/delete`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({password: password})
     });
@@ -148,6 +157,7 @@ export async function updateEmail(newEmail: string, password: string): Promise<S
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/updateEmail`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({newEmail: newEmail, password: password})
     });
@@ -164,6 +174,7 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/updatePassword`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({oldPassword: oldPassword, newPassword: newPassword})
     });
@@ -178,7 +189,8 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
 // Get Current User Ingredients
 export async function getCurrentUserIngredients(): Promise<{ingredients: [Ingredient]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -194,6 +206,7 @@ export async function updateUserIngredients(newIngredients: [Ingredient], remove
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/update`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({newIngredients: newIngredients, removedIngredients: removedIngredients})
     });
@@ -209,7 +222,8 @@ export async function updateUserIngredients(newIngredients: [Ingredient], remove
 // Get Possible Cocktails
 export async function getPossibleCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -223,7 +237,8 @@ export async function getPossibleCocktails(): Promise<{cocktails: [Cocktail]} | 
 // Get All Cocktails
 export async function getAllCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -237,7 +252,8 @@ export async function getAllCocktails(): Promise<{cocktails: [Cocktail]} | Failu
 // Get Cocktail's Info
 export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/${cocktailID}`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -251,7 +267,8 @@ export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Fa
 // Get Cocktails Containing Ingredient
 export async function getCocktailContaining(ingredientID: string): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/containing/${ingredientID}`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -265,7 +282,8 @@ export async function getCocktailContaining(ingredientID: string): Promise<{cock
 // Get Categorized Ingredients
 export async function getCategorizedIngredients(): Promise<{ingredients: CategorizedIngredients} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/ingredients/categorized`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -281,6 +299,7 @@ export async function likeCocktail(cocktailID: string): Promise<StatusResponse> 
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/like`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
@@ -297,6 +316,7 @@ export async function removeLikedCocktail(cocktailID: string): Promise<StatusRes
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/remove_like`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
@@ -313,6 +333,7 @@ export async function dislikeCocktail(cocktailID: string): Promise<StatusRespons
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/dislike`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
@@ -329,6 +350,7 @@ export async function removeDislikedCocktail(cocktailID: string): Promise<Status
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/remove_dislike`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
@@ -343,7 +365,8 @@ export async function removeDislikedCocktail(cocktailID: string): Promise<Status
 // Get Liked Cocktails
 export async function getLikedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/likes`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -357,7 +380,8 @@ export async function getLikedCocktails(): Promise<{cocktails: [Cocktail]} | Fai
 // Get Disliked Cocktails
 export async function getDislikedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/dislikes`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
@@ -373,6 +397,7 @@ export async function favoriteCocktail(cocktailID: string): Promise<StatusRespon
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/favorite`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
@@ -389,6 +414,7 @@ export async function unfavoriteCocktail(cocktailID: string): Promise<StatusResp
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/unfavorite`, {
         method: 'POST',
         mode: 'cors',
+        credentials: "include",
         headers: {'Content-Type': 'application/jaon'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
@@ -403,7 +429,8 @@ export async function unfavoriteCocktail(cocktailID: string): Promise<StatusResp
 // Get Favorited Cocktails
 export async function getFavoritedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/favorites`, {
-        method: 'GET'
+        method: 'GET',
+        credentials: "include"
     });
 
     if(resp.ok) {
