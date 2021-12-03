@@ -3,6 +3,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { isLoggedIn } from '../../services/api';
+import Navbar from '../sections/Navbar/Navbar';
 import './App.css';
 
 const App = () => {
@@ -17,7 +18,7 @@ const App = () => {
     <div className="App" style={{'height': '100%'}}>
       <Stack h={'100%'}>
         <Routes>
-          {/* TODO: Add Navbar Here */}
+          <Navbar isLoggedIn={loggedIn}/>
           <Route path='/'  element={<></>}/>
           <Route path='/my_ingredients'  element={<></>}/>
           <Route path='/my_cocktails'  element={<></>}/>
@@ -36,7 +37,7 @@ const App = () => {
     <BrowserRouter>
       <div className="App" style={{"height": "100%"}}>
         <Stack h={"100%"}>
-          {/* TODO: Add Navbar here */}
+          <Navbar isLoggedIn={loggedIn}/>
           {/* TODO: Add Homepage Component Here */}
         </Stack>
       </div>
