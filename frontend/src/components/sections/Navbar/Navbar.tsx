@@ -96,7 +96,7 @@ const DesktopNavbarItems = () => {
 const MobileNavbarItems = ({ closeNavbar }: { closeNavbar: () => void }) => (
   <Stack p={4} display={{ md: 'none' }}>
     {NAVBAR_ITEMS.map((navbarItem: NavbarItem) => (
-      <MobileNavbarItem navbarItem={navbarItem} closeNavbar={closeNavbar} />
+      <MobileNavbarItem key={navbarItem.label} navbarItem={navbarItem} closeNavbar={closeNavbar} />
     ))}
     <MobileNavbarItem navbarItem={{ label: 'Settings', href: '/settings' }} closeNavbar={closeNavbar} />
   </Stack>
