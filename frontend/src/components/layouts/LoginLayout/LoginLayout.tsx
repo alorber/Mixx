@@ -27,31 +27,26 @@ import { ChangeEvent } from 'react';
   )
 }*/
 
-function SendSignupInfo(username: string, password: string, firstname:string, lastname:string){
-  signup(username, password, firstname, lastname);
+function SendLoginInfo(username: string, password: string){
+  login(username,password);
+  //signup('username', 'password','a','b');
 }
 
 
-const HomeLayout = () => {
+const LoginLayout = () => {
     console.log("hey");
     const [username, setUsername] = React.useState("")
     //const [password, setPassword] = React.useState("");
     //const handleChange = (e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)
 
     const [password, setPassword] = React.useState("");
-    const [firstname, setFirstname] = React.useState("");
-    const [lastname, setLastname] = React.useState("");
-
     const [show, setShow] = React.useState(false)
     const handleClick = () => setShow(!show)
 
     return (
         <div>
             Welcome to Mixx
-            <Input placeholder='First Name' onChange={(e: ChangeEvent<HTMLInputElement>) => setFirstname(e.target.value)}/>
-            <Input placeholder='Last Name' onChange={(e: ChangeEvent<HTMLInputElement>) => setLastname(e.target.value)}/>
-
-            <Input placeholder='email' onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}/>
+            <Input placeholder='username' onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}/>
 
             <InputGroup size='md'>
               <Input
@@ -67,9 +62,9 @@ const HomeLayout = () => {
               </InputRightElement>
             </InputGroup>
 
-            <Button onClick={() => {SendSignupInfo(username, password, firstname, lastname)}}>Sign up</Button>
+            <Button onClick={() => {SendLoginInfo(username, password)}}>Log in</Button>
         </div>
     );
 };
 
-export default HomeLayout;
+export default LoginLayout;

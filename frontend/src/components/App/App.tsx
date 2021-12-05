@@ -1,11 +1,13 @@
+import { Stack } from '@chakra-ui/layout';
 import * as React from 'react';
-import HomeLayout from '../layouts/HomeLayout/HomeLayout';
-import Navbar from '../sections/Navbar/Navbar';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { isLoggedIn } from '../../services/api';
-import { Stack } from '@chakra-ui/layout';
-import { useEffect, useState } from 'react';
+import Navbar from '../sections/Navbar/Navbar';
 import './App.css';
+import HomeLayout from '../layouts/HomeLayout/HomeLayout';
+import LoginLayout from '../layouts/LoginLayout/LoginLayout';
+
 
 const App = () => {
   const [loggedIn, updateLoggedIn] = useState(false);
@@ -18,9 +20,10 @@ const App = () => {
    <BrowserRouter>
     <div className="App" style={{'height': '100%'}}>
       <Stack h={'100%'}>
-      <Navbar isLoggedIn={loggedIn}/>
         <Routes>
+          <Navbar isLoggedIn={loggedIn}/>
           <Route path='/' element={<HomeLayout />}/>
+          <Route path='/login' element={<LoginLayout />}/>
           <Route path='/my_ingredients' element={<></>}/>
           <Route path='/my_cocktails' element={<></>}/>
           <Route path='/my_favorites' element={<></>}/>
@@ -39,7 +42,7 @@ const App = () => {
       <div className="App" style={{"height": "100%"}}>
         <Stack h={"100%"}>
           <Navbar isLoggedIn={loggedIn}/>
-          <HomeLayout />
+          <LoginLayout />
         </Stack>
       </div>
     </BrowserRouter>
