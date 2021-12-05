@@ -10,7 +10,7 @@ import os
 
 # ------ Flask Setup ------
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app, supports_credentials=True)
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['SECRET_KEY'] = os.urandom(40)
 bcrypt = Bcrypt(app)
@@ -63,8 +63,8 @@ def signup():
         ).inserted_id
 
     # Return userID
-    session['user_id'] = user_id
-    return {'userID': user_id}, 200
+    session['user_id'] = str(user_id)
+    return {'userID': str(user_id)}, 200
 
 # Login
 @app.route('/login', methods=['POST'])
@@ -82,8 +82,8 @@ def login():
     authorized = bcrypt.check_password_hash(user['password'], login_info['password'])
 
     if authorized:
-        session['user_id'] = user['_id']
-        return {'userID': user['_id'], 'firstName': user['first_name'], 'lastName': user['last_name']}, 200
+        session['user_id'] = str(user['_id'])
+        return {'userID': str(user['_id']), 'firstName': user['first_name'], 'lastName': user['last_name']}, 200
     else:
         # ERROR: Incorrect Password
         return {}, 462
