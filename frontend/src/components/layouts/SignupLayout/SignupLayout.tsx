@@ -28,28 +28,31 @@ import { Link } from "react-router-dom";
   )
 }*/
 
-function SendLoginInfo(username: string, password: string){
-  login(username,password);
+function SendSignupInfo(username: string, password: string, firstname:string, lastname:string){
+  signup(username, password, firstname, lastname);
 }
 
-function GoToSignup(){
 
-}
-
-const LoginLayout = () => {
+const HomeLayout = () => {
     console.log("hey");
     const [username, setUsername] = React.useState("")
     //const [password, setPassword] = React.useState("");
     //const handleChange = (e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)
 
     const [password, setPassword] = React.useState("");
+    const [firstname, setFirstname] = React.useState("");
+    const [lastname, setLastname] = React.useState("");
+
     const [show, setShow] = React.useState(false)
     const handleClick = () => setShow(!show)
 
     return (
         <div>
             Welcome to Mixx
-            <Input placeholder='Username' onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}/>
+            <Input placeholder='First Name' onChange={(e: ChangeEvent<HTMLInputElement>) => setFirstname(e.target.value)}/>
+            <Input placeholder='Last Name' onChange={(e: ChangeEvent<HTMLInputElement>) => setLastname(e.target.value)}/>
+
+            <Input placeholder='Email' onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}/>
 
             <InputGroup size='md'>
               <Input
@@ -65,10 +68,11 @@ const LoginLayout = () => {
               </InputRightElement>
             </InputGroup>
 
-            <Button onClick={() => {SendLoginInfo(username, password)}}>Log in</Button>
-            <Link to="/signup" className="signupLink">signup</Link>
+            <Button onClick={() => {SendSignupInfo(username, password, firstname, lastname)}}>Sign up</Button>
+            <Link to="/login" className="signupLink">login</Link>
+
         </div>
     );
 };
 
-export default LoginLayout;
+export default HomeLayout;

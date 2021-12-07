@@ -7,7 +7,8 @@ import Navbar from '../sections/Navbar/Navbar';
 import './App.css';
 import HomeLayout from '../layouts/HomeLayout/HomeLayout';
 import LoginLayout from '../layouts/LoginLayout/LoginLayout';
-
+import SignupLayout from '../layouts/SignupLayout/SignupLayout';
+import {Fragment} from 'react';
 
 const App = () => {
   const [loggedIn, updateLoggedIn] = useState(false);
@@ -24,6 +25,7 @@ const App = () => {
           <Navbar isLoggedIn={loggedIn}/>
           <Route path='/' element={<HomeLayout />}/>
           <Route path='/login' element={<LoginLayout />}/>
+          <Route path='/signup' element={<SignupLayout />}/>
           <Route path='/my_ingredients' element={<></>}/>
           <Route path='/my_cocktails' element={<></>}/>
           <Route path='/my_favorites' element={<></>}/>
@@ -39,14 +41,26 @@ const App = () => {
    </BrowserRouter>
   ) : (
     <BrowserRouter>
-      <div className="App" style={{"height": "100%"}}>
-        <Stack h={"100%"}>
-          <Navbar isLoggedIn={loggedIn}/>
-          <LoginLayout />
-        </Stack>
-      </div>
+    <Fragment>
+    <div className="App" style={{'height': '100%'}}>
+      <Stack h={'100%'}>
+        <Routes>
+          <Route path='/login' element={<LoginLayout />}/>
+          <Route path='/signup' element={<SignupLayout />}/>
+          <Route path='/' element={<LoginLayout />}/>
+        </Routes>
+      </Stack>
+    </div>
+    </Fragment>
     </BrowserRouter>
   );
 }
 
 export default App;
+
+/*<div className="App" style={{"height": "100%"}}>
+  <Stack h={"100%"}>
+    <Navbar isLoggedIn={loggedIn}/>
+    <LoginLayout />
+  </Stack>
+</div>*/
