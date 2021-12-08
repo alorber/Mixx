@@ -1,9 +1,11 @@
 import * as React from 'react';
 import NavbarLink from '../../ui/NavbarLink/NavbarLink';
 import { CloseIcon, HamburgerIcon, SettingsIcon } from '@chakra-ui/icons';
+import { Link as RouterLink } from 'react-router-dom';
 import { NAVBAR_ITEMS } from './NavbarItems';
 import {
   Box,
+  Button,
   Collapse,
   Flex,
   Icon,
@@ -45,8 +47,14 @@ const Navbar = ({ isLoggedIn }: NavbarProps) => {
           </Flex>
           {/* Desktop Navbar Links */}
           <Flex display={{ base: 'none', md: 'flex' }} h='fill' ml={'auto'}>
-            <DesktopNavbarItems />
+            <DesktopNavbarItems isLoggedIn={isLoggedIn} />
           </Flex>
+          {/* Sign In Button on Mobile */}
+          { !isLoggedIn && (
+            <Flex alignItems='center' ml='auto' display={{base: 'flex', md: 'none'}}>
+              <SignInButton closeNavbar={closeNavbar} />
+            </Flex>
+          )}
         </Flex>
       </Flex>
 
@@ -59,7 +67,7 @@ const Navbar = ({ isLoggedIn }: NavbarProps) => {
 };
 
 // Navbar Items for Desktop
-const DesktopNavbarItems = () => {
+const DesktopNavbarItems = ({ isLoggedIn }: NavbarProps) => {
   return (
     <Stack spacing={[4, 4, 10, 20]} align="center" justify={"flex-end"}
       direction={"row"} pr={4}>
@@ -84,10 +92,18 @@ const DesktopNavbarItems = () => {
           </Popover>
         </Box>
       ))}
-      <NavbarLink linkTo={"/settings"}>
-        <Icon color={'#2395ff'} w={5} h={5} as={SettingsIcon} _hover={{ transform: "rotate(45deg)", transition: 'all .25s ease-in' }}
-          transform={'rotate(-45deg)'} transition={'all .25s ease'} />
-      </NavbarLink>
+      {isLoggedIn
+        ? (
+            <NavbarLink linkTo={"/settings"}>
+              <Icon color={'#2395ff'} w={5} h={5} as={SettingsIcon} 
+                  _hover={{ transform: "rotate(45deg)", transition: 'all .25s ease-in' }}
+                  transform={'rotate(-45deg)'} transition={'all .25s ease'} />
+            </NavbarLink>
+          )
+        : (
+          <SignInButton />
+        )
+      }
     </Stack>
   );
 }
@@ -120,7 +136,8 @@ const MobileNavbarItem = ({ navbarItem, closeNavbar }: { navbarItem: NavbarItem,
       <Stack pl={4} borderLeft={"solid #cfcdcc .5px"} align='start'>
         {navbarItem.children && (
           navbarItem.children.map((child) => (
-            <NavbarLink key={child.label} linkTo={child.href ?? '#'} isSubNav={true} onPageChange={() => { closeNavbar(); closeSubmenu() }}>
+            <NavbarLink key={child.label} linkTo={child.href ?? '#'} isSubNav={true} 
+                onPageChange={() => { closeNavbar(); closeSubmenu() }}>
               {child.label}
             </NavbarLink>
           ))
@@ -128,6 +145,16 @@ const MobileNavbarItem = ({ navbarItem, closeNavbar }: { navbarItem: NavbarItem,
       </Stack>
     </Collapse>
   </>)
+}
+
+// Sign In Button
+const SignInButton = ({closeNavbar}: {closeNavbar?: () => void}) => {
+  return (
+    <Button as={RouterLink} to={'/login'} onClick={closeNavbar} boxShadow='sm' backgroundColor={"#b7e0ff"} 
+        _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} _focus={{outline: "none"}}>
+      Sign In
+    </Button>
+  );
 }
 
 export default Navbar;
