@@ -1,11 +1,10 @@
 import * as React from 'react';
 import NavbarLink from '../../ui/NavbarLink/NavbarLink';
+import ThemedButton from '../../ui/ThemedButton/ThemedButton';
 import { CloseIcon, HamburgerIcon, SettingsIcon } from '@chakra-ui/icons';
-import { Link as RouterLink } from 'react-router-dom';
 import { NAVBAR_ITEMS } from './NavbarItems';
 import {
   Box,
-  Button,
   Collapse,
   Flex,
   Icon,
@@ -52,7 +51,7 @@ const Navbar = ({ isLoggedIn }: NavbarProps) => {
           {/* Sign In Button on Mobile */}
           { !isLoggedIn && (
             <Flex alignItems='center' ml='auto' display={{base: 'flex', md: 'none'}}>
-              <SignInButton closeNavbar={closeNavbar} />
+              <ThemedButton label={'Sign In'} routeTo={'/login'} onClick={closeNavbar} />
             </Flex>
           )}
         </Flex>
@@ -101,7 +100,7 @@ const DesktopNavbarItems = ({ isLoggedIn }: NavbarProps) => {
             </NavbarLink>
           )
         : (
-          <SignInButton />
+          <ThemedButton label={'Sign In'} routeTo={'/login'} />
         )
       }
     </Stack>
@@ -145,16 +144,6 @@ const MobileNavbarItem = ({ navbarItem, closeNavbar }: { navbarItem: NavbarItem,
       </Stack>
     </Collapse>
   </>)
-}
-
-// Sign In Button
-const SignInButton = ({closeNavbar}: {closeNavbar?: () => void}) => {
-  return (
-    <Button as={RouterLink} to={'/login'} onClick={closeNavbar} boxShadow='sm' backgroundColor={"#b7e0ff"} 
-        _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} _focus={{outline: "none"}}>
-      Sign In
-    </Button>
-  );
 }
 
 export default Navbar;

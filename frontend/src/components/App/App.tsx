@@ -15,7 +15,7 @@ const App = () => {
   }, [updateLoggedIn]);
 
   const showIfLoggedIn = (component: JSX.Element) => {
-    return loggedIn ? component : < LoginSignupLayout updateLoggedIn={updateLoggedIn} />
+    return loggedIn ? component : < LoginSignupLayout isLoggedIn={loggedIn} updateLoggedIn={updateLoggedIn} />
   }
 
   return (
@@ -24,7 +24,7 @@ const App = () => {
         <Navbar isLoggedIn={loggedIn}/>
         <Routes>
           <Route path='/' element={<HomeLayout />}/>
-          <Route path='/login' element={<LoginSignupLayout updateLoggedIn={updateLoggedIn} />}/>
+          <Route path='/login' element={<LoginSignupLayout isLoggedIn={loggedIn} updateLoggedIn={updateLoggedIn} />}/>
           <Route path='/my_ingredients' element={showIfLoggedIn(<></>)}/>
           <Route path='/my_cocktails' element={showIfLoggedIn(<></>)}/>
           <Route path='/my_favorites' element={showIfLoggedIn(<></>)}/>
@@ -33,7 +33,7 @@ const App = () => {
           <Route path='/cocktails/:cocktail_id' element={<></>}/>
           <Route path='/cocktails' element={<></>}/>
           <Route path='/search' element={<></>}/>
-          <Route path='/settings' element={<></>}/>
+          <Route path='/settings' element={showIfLoggedIn(<></>)}/>
         </Routes>
       </Stack>
    </BrowserRouter>

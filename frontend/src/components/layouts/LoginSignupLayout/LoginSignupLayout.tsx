@@ -7,12 +7,23 @@ import {
     Stack,
     Text
     } from '@chakra-ui/react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 
-const LoginSignupLayout = ({updateLoggedIn}: {updateLoggedIn: (l: boolean) => void}) => {
+const LoginSignupLayout = ({isLoggedIn, updateLoggedIn}: {isLoggedIn: boolean, updateLoggedIn: (l: boolean) => void}) => {
+    const navigate = useNavigate();
+    const location = useLocation()
+    
+    // Redirect to home from signup page
+    useEffect(() => {
+        if(isLoggedIn && location.pathname === '/login') {
+            navigate('/')
+        }
+    })
 
     return (
         <Stack>
-            <LoginSignupForm updateLoggedIn={updateLoggedIn} />
+            {!isLoggedIn && <LoginSignupForm updateLoggedIn={updateLoggedIn} />}
             <Stack>
                 <Heading size='lg' my={10}>Why Sign Up?</Heading>
                 <Grid templateColumns={["repeat(1,auto)","repeat(1,auto)","repeat(2,auto)","repeat(2,auto)"]}
