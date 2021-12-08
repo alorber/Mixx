@@ -70,6 +70,24 @@ const LoginSignupForm = ({updateLoggedIn}: {updateLoggedIn: (l: boolean) => void
                             <Stack spacing={4}>
                                 {/* Error Message */}
                                 {errorCode !== null && <FormErrorMessage errorCode={errorCode} /> }
+                                {formType === 'Signup' && <>
+                                    {/* First Name Field */}
+                                    <FormControl isRequired>
+                                        <FormLabel>First Name</FormLabel>
+                                        <Input type="name" placeholder="Laura" value={formValues.firstName}
+                                            aria-label="Email"  borderColor="#b7e0ff" _hover={{borderColor: "#2395FF"}}
+                                            onChange={e => updateForm('firstName', e.currentTarget.value)}
+                                            focusBorderColor="#2395ff"/>
+                                    </FormControl>
+                                    {/* Last Name Field */}
+                                    <FormControl isRequired>
+                                        <FormLabel>Last Name</FormLabel>
+                                        <Input type="name" placeholder="Sparks" value={formValues.email}
+                                            aria-label="Email"  borderColor="#b7e0ff" _hover={{borderColor: "#2395FF"}}
+                                            onChange={e => updateForm('lastName', e.currentTarget.value)}
+                                            focusBorderColor="#2395ff"/>
+                                    </FormControl>
+                                </>}
                                 {/* Email Field */}
                                 <FormControl isRequired>
                                     <FormLabel>Email Address</FormLabel>
