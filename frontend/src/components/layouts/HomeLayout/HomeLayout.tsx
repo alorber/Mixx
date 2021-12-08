@@ -1,5 +1,4 @@
-import React from 'react'
-import { ChangeEvent } from 'react';
+import React from 'react';
 
 const HomeLayout = () => {
     console.log("hey");

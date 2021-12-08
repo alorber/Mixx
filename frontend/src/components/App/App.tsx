@@ -1,14 +1,11 @@
-import { Stack } from '@chakra-ui/layout';
-import * as React from 'react';
-import { useEffect, useState } from 'react';
+import HomeLayout from '../layouts/HomeLayout/HomeLayout';
+import LoginSignupLayout from '../layouts/LoginSignupLayout/LoginSignupLayout';
+import Navbar from '../sections/Navbar/Navbar';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { isLoggedIn } from '../../services/api';
-import Navbar from '../sections/Navbar/Navbar';
+import { Stack } from '@chakra-ui/layout';
+import { useEffect, useState } from 'react';
 import './App.css';
-import HomeLayout from '../layouts/HomeLayout/HomeLayout';
-import LoginLayout from '../layouts/LoginLayout/LoginLayout';
-import SignupLayout from '../layouts/SignupLayout/SignupLayout';
-import {Fragment} from 'react';
 
 const App = () => {
   const [loggedIn, updateLoggedIn] = useState(false);
@@ -17,18 +14,20 @@ const App = () => {
     updateLoggedIn(isLoggedIn())
   }, [updateLoggedIn]);
 
-  return loggedIn ? (
+  const showIfLoggedIn = (component: JSX.Element) => {
+    return loggedIn ? component : < LoginSignupLayout updateLoggedIn={updateLoggedIn} />
+  }
+
+  return (
    <BrowserRouter>
-    <div className="App" style={{'height': '100%'}}>
-      <Stack h={'100%'}>
+      <Stack className="App" h={'100%'}>
+        <Navbar isLoggedIn={loggedIn}/>
         <Routes>
-          <Navbar isLoggedIn={loggedIn}/>
           <Route path='/' element={<HomeLayout />}/>
-          <Route path='/login' element={<LoginLayout />}/>
-          <Route path='/signup' element={<SignupLayout />}/>
-          <Route path='/my_ingredients' element={<></>}/>
-          <Route path='/my_cocktails' element={<></>}/>
-          <Route path='/my_favorites' element={<></>}/>
+          <Route path='/login' element={<LoginSignupLayout updateLoggedIn={updateLoggedIn} />}/>
+          <Route path='/my_ingredients' element={showIfLoggedIn(<></>)}/>
+          <Route path='/my_cocktails' element={showIfLoggedIn(<></>)}/>
+          <Route path='/my_favorites' element={showIfLoggedIn(<></>)}/>
           <Route path='/ingredients/:ingredient_id' element={<></>}/>
           <Route path='/ingredients' element={<></>}/>
           <Route path='/cocktails/:cocktail_id' element={<></>}/>
@@ -37,30 +36,8 @@ const App = () => {
           <Route path='/settings' element={<></>}/>
         </Routes>
       </Stack>
-    </div>
    </BrowserRouter>
-  ) : (
-    <BrowserRouter>
-    <Fragment>
-    <div className="App" style={{'height': '100%'}}>
-      <Stack h={'100%'}>
-        <Routes>
-          <Route path='/login' element={<LoginLayout />}/>
-          <Route path='/signup' element={<SignupLayout />}/>
-          <Route path='/' element={<LoginLayout />}/>
-        </Routes>
-      </Stack>
-    </div>
-    </Fragment>
-    </BrowserRouter>
   );
 }
 
 export default App;
-
-/*<div className="App" style={{"height": "100%"}}>
-  <Stack h={"100%"}>
-    <Navbar isLoggedIn={loggedIn}/>
-    <LoginLayout />
-  </Stack>
-</div>*/
