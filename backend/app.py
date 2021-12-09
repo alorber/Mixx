@@ -319,7 +319,11 @@ def get_categorized_ingredients():
         categorized_ingr[category] = {}
         subcategories = sorted([categories['subcategories'] for categories in ingr_query_resp if categories['_id'] == category][0], key=cmp_to_key(sort_subcategories))
         for subcategory in subcategories:
-            categorized_ingr[category][subcategory['subcategory']] = sorted(subcategory['ingredients'], key=cmp_to_key(sort_ingr))
+            ingredients = sorted(subcategory['ingredients'], key=cmp_to_key(sort_ingr))
+            # Converts id to string for JSON
+            for ingr in ingredients:
+                ingr['id'] = str(ingr['id'])
+            categorized_ingr[category][subcategory['subcategory']] = ingredients
 
     return {'ingredients': categorized_ingr}, 200
 

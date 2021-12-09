@@ -42,10 +42,13 @@ export type Ingredient = {
     subcategory: string;
 };
 
-type CATEGORIES = 'Spirits' | 'Liqueurs' | 'Wines and Champagnes' | 'Beers and Ciders' | 'Mixers' | 'Other';
+export type CATEGORIES = 'Spirits' | 'Liqueurs' | 'Wines and Champagnes' | 'Beers and Ciders' | 'Mixers' | 'Other';
 export type CategorizedIngredients = {
-   [key in CATEGORIES]: {
-       [key: string]: [string]
+   [key in string]: {
+       [key: string]: [{
+           name: string,
+           id: string
+       }]
    }
 };
 
@@ -187,15 +190,16 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
 }
 
 // Get Current User Ingredients
-export async function getCurrentUserIngredients(): Promise<{ingredients: [Ingredient]} | Failure> {
+export async function getCurrentUserIngredients(): Promise<{ingredients: [Ingredient], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients`, {
         method: 'GET',
+        mode: 'cors',
         credentials: "include"
     });
 
     if(resp.ok) {
         const resp_data: {ingredients: [Ingredient]} = await resp.json();
-        return {ingredients: resp_data.ingredients}
+        return {ingredients: resp_data.ingredients, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
@@ -280,15 +284,16 @@ export async function getCocktailContaining(ingredientID: string): Promise<{cock
 }
 
 // Get Categorized Ingredients
-export async function getCategorizedIngredients(): Promise<{ingredients: CategorizedIngredients} | Failure> {
+export async function getCategorizedIngredients(): Promise<{ingredients: CategorizedIngredients, status: 'Success'} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/ingredients/categorized`, {
         method: 'GET',
+        mode: 'cors',
         credentials: "include"
     });
 
     if(resp.ok) {
         const resp_data: {ingredients: CategorizedIngredients} = await resp.json();
-        return {ingredients: resp_data.ingredients}
+        return {ingredients: resp_data.ingredients, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }

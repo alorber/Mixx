@@ -1,5 +1,6 @@
 import HomeLayout from '../layouts/HomeLayout/HomeLayout';
 import LoginSignupLayout from '../layouts/LoginSignupLayout/LoginSignupLayout';
+import MyIngredientsLayout from '../layouts/MyIngredientsLayout/MyIngredientsLayout';
 import Navbar from '../sections/Navbar/Navbar';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { isLoggedIn } from '../../services/api';
@@ -25,7 +26,7 @@ const App = () => {
         <Routes>
           <Route path='/' element={<HomeLayout />}/>
           <Route path='/login' element={<LoginSignupLayout isLoggedIn={loggedIn} updateLoggedIn={updateLoggedIn} />}/>
-          <Route path='/my_ingredients' element={showIfLoggedIn(<></>)}/>
+          <Route path='/my_ingredients' element={showIfLoggedIn(<MyIngredientsLayout />)}/>
           <Route path='/my_cocktails' element={showIfLoggedIn(<></>)}/>
           <Route path='/my_favorites' element={showIfLoggedIn(<></>)}/>
           <Route path='/ingredients/:ingredient_id' element={<></>}/>

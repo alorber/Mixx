@@ -1,13 +1,6 @@
 import * as React from 'react';
-import {
-    Box,
-    Flex,
-    Icon,
-    Link,
-    Stack,
-    Text
-    } from '@chakra-ui/react';
-import { ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import StyledListItem from '../StyledListItem/StyledListItem';
+import { Link } from '@chakra-ui/react';
 import { Link as RouterLink } from 'react-router-dom';
 
 type NavbarLinkProps = {
@@ -25,35 +18,17 @@ const NavbarLink = ({linkTo, onPageChange = () => {}, isSubNav = false, showDrop
         <Link as={RouterLink} to={linkTo} onClick={onPageChange} _focus={{outline: "none"}}
             role={'group'} display={'block'} p={2} rounded={'md'} w={'100%'}
             _hover={{textDecoration: "none", bg: "#eaf6ff"}}>
-            <Stack direction={'row'} align={'center'}>
-                {/* Link Label */}
-                <Box>
-                    <Text transition={'all .3s ease'} _groupHover={{color: '#2395ff'}} fontWeight={500}>
-                        {children}
-                    </Text>
-                </Box>
-                {/* Arrow Icon */}
-                <Flex transition={'all .3s ease'} transform={'translateX(-10px)'} opacity={0}
-                        _groupHover={{opacity: '100%', transform: "translateX(0)"}} justify={'flex-end'}
-                        align={'center'} flex={1}>
-                    <Icon color={'#2395ff'} w={5} h={5} as={ChevronRightIcon} />
-                </Flex>
-            </Stack>
+            <StyledListItem >
+                {children}
+            </StyledListItem> 
         </Link>
     ) : (
         <Link as={RouterLink} to={linkTo} onClick={onPageChange} _focus={{outline: "none"}}
                 _hover={{textDecoration: "none", color: "#2395ff"}} fontWeight={500}>
-            <Stack direction='row'>
-                {/* Link Label */}
-                <Text display="block" mr='auto'>
-                    {children}
-                </Text>
-                {/* Arrow Icon for Dropdown Menu */}
-                {showDropdownIcon && (
-                    <Icon as={ChevronDownIcon} transition={'transform .25s ease-in-out'}
-                        transform={isDropdownOpen ? 'rotate(180deg)' : ''} w={6} h={6} />
-                )}
-            </Stack>   
+            <StyledListItem isItemDropdown={true} showDropdownIcon={showDropdownIcon}
+                    isDropdownOpen={isDropdownOpen}>
+                {children}
+            </StyledListItem>
         </Link>
     );
 };
