@@ -1,31 +1,80 @@
+import IngredientsList from '../../ui/IngredientsList/IngredientsList';
 import React from 'react';
-import StyledListItem from '../../ui/StyledListItem/StyledListItem';
 import {
-    CATEGORIES,
+    CATEGORIES_LIST,
     CategorizedIngredients,
     getCategorizedIngredients,
     getCurrentUserIngredients,
     Ingredient
     } from '../../../services/api';
-import {
-    Collapse,
-    Link,
-    Stack,
-    Text,
-    useDisclosure
-    } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import {
+    Box,
+    Heading,
+    Text,
+    } from '@chakra-ui/react';
 
 const MyIngredientsLayout = () => {
     const [isLoading, setIsloading] = useState(false);
     const [ingredientsList, setIngredientsList] = useState<CategorizedIngredients | null>(null);
     const [userIngredientsList, setUserIngredientsList] = useState<[Ingredient] | null>(null);
-    const [allIngredientsErrorCode, setAllIngredientsErrorCode] = useState<number | null>(null)
-    const [userIngredientsErrorCode, setUserIngredientsErrorCode] = useState<number | null>(null)
+    const [categorizedUserIngredientsList, setCategorizedUserIngredientsList] = useState<CategorizedIngredients | null>(null);
+    const [addedIngredients, setAddedIngredients] = useState<[Ingredient] | []>([]);
+    const [removedIngredients, setRemovedIngredients] = useState<[Ingredient] | []>([]);
+    const [allIngredientsErrorCode, setAllIngredientsErrorCode] = useState<number | null>(null);
+    const [userIngredientsErrorCode, setUserIngredientsErrorCode] = useState<number | null>(null);
 
+    // Marks user ingredients in master list
+    const markUserIngredients = () => {
+        if(ingredientsList === null || userIngredientsList === null) {
+            return
+        }
+
+        const userIngredientsIDs = userIngredientsList.map(userIngredient => userIngredient['_id'])
+
+        for(const category in ingredientsList) {
+            for(const subcategory in ingredientsList[category]) {
+                for(const ingredient of ingredientsList[category][subcategory]) {
+                    ingredient['owned'] = userIngredientsIDs.includes(ingredient.id);
+                }
+            }
+        }
+    }
+
+    // Restructures user ingredients to be compatible with list coponent
+    const restructureUserList = () => {
+        if(userIngredientsList === null) {
+            return;
+        }
+
+        // Adds categories in order
+        const restructuredUserList = CATEGORIES_LIST.reduce(
+            (ingredients:CategorizedIngredients, category:string) => {ingredients[category] = {}; return ingredients;}, {}
+        );
+        
+        // Adds restructured ingredients
+        for(const ingredient of userIngredientsList) {
+            const restructuredIngredient = {id: ingredient._id, name: ingredient.name, owned: true};
+            if(!restructuredUserList[ingredient.category].hasOwnProperty(ingredient.subcategory)) {
+                restructuredUserList[ingredient.category][ingredient.subcategory] = [restructuredIngredient];
+            } else {
+                restructuredUserList[ingredient.category][ingredient.subcategory].push(restructuredIngredient);
+            }
+        }
+
+        // Removes empty categories
+        for(const category in restructuredUserList) {
+            if(Object.keys(restructuredUserList[category]).length === 0) {
+                delete restructuredUserList[category];
+            }
+        }
+
+        setCategorizedUserIngredientsList(restructuredUserList);
+    }
 
     // Get List of Ingredients
     const getAllIngredients = async () => {
+        setIsloading(true);
         const resp = await getCategorizedIngredients()
         if(resp.status === "Success") {
             setIngredientsList(resp.ingredients);
@@ -50,86 +99,30 @@ const MyIngredientsLayout = () => {
         }
     }
 
+    // Load list on pageload
     useEffect(() => {
         setIsloading(true);
-        getAllIngredients()
-        getUserIngredients()
-        setIsloading(false);
+        getAllIngredients();
+        getUserIngredients();
     }, []);
 
+    // Check if received lists
+    useEffect(() => {
+        if(ingredientsList !== null && userIngredientsList !== null) {
+            markUserIngredients();
+            restructureUserList();
+            setIsloading(false);
+        }
+    }, [ingredientsList, userIngredientsList])
+
     return isLoading ? (
-        <Text>Loading...</Text>
-    ) : ingredientsList !== null && userIngredientsList !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
-        <Stack p={4}>
-            {Object.keys(ingredientsList).map((category: string) => (
-                <CategoryListItem key={category} categoryIngredientsList={ingredientsList[category]} 
-                userIngredientsList={userIngredientsList} category={category} />
-            ))}
-        </Stack>
+        <Heading pt={10}>Loading...</Heading>
+    ) : ingredientsList !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
+        <Box pt={10} w='100%' h='100%' justifyContent='center'>
+            <IngredientsList ingredientsList={ingredientsList} />
+        </Box>
     ) : (
         <Text>Error</Text>
-    );
-}
-
-// Category List Item
-type CategoryListItemProps = {
-    categoryIngredientsList: {[key: string]: [{name: string, id: string}]},
-    userIngredientsList: [Ingredient],
-    category: string,
-    subcategory?: string | null
-}
-
-const CategoryListItem = ({categoryIngredientsList, userIngredientsList, category, subcategory = null}: CategoryListItemProps) => {
-    const { isOpen, onToggle } = useDisclosure();
-    
-    return (<>
-        <Stack spacing={4} onClick={onToggle}>
-            <Link _focus={{outline: "none"}} _hover={{textDecoration: "none", color: "#2395ff"}} 
-                    fontWeight={500}>
-                <StyledListItem isItemDropdown={true} showDropdownIcon={true} isDropdownOpen={isOpen}>
-                    {subcategory ?? category}
-                </StyledListItem> 
-            </Link>
-        </Stack> 
-
-        {/* Dropdown Menu */}
-        <Collapse in={isOpen} animateOpacity>
-            <Stack pl={4} borderLeft={"solid #cfcdcc .5px"} align='start'>
-                {subcategory === null ? (
-                    Object.keys(categoryIngredientsList).map((subcategory: string) => (
-                        <CategoryListItem key={subcategory} categoryIngredientsList={categoryIngredientsList}
-                        userIngredientsList={userIngredientsList} category={category} subcategory={subcategory} />
-                    ))
-                ) : (
-                    categoryIngredientsList[subcategory].map((ingredient: {name: string, id: string}) => (
-                        <IngredientsListItem ingredient={ingredient} key={ingredient.id}
-                            userIngredientsList={userIngredientsList} category={category} subcategory={subcategory} />
-                    ))
-                )}
-            </Stack>
-        </Collapse>
-    </>);
-}
-
-type IngredientsListItemProps = {
-    ingredient: {name: string, id: string},
-    userIngredientsList: [Ingredient],
-    category: string,
-    subcategory: string
-}
-
-const IngredientsListItem = (
-    {ingredient, userIngredientsList, category, subcategory}: IngredientsListItemProps
-) => {
-    return (
-        <Stack spacing={4}>
-            <Link _focus={{outline: "none"}} role={'group'} display={'block'} p={2} rounded={'md'} w={'100%'}
-                    _hover={{textDecoration: "none", bg: "#eaf6ff"}}>
-                <StyledListItem>
-                    {ingredient.name}
-                </StyledListItem>
-            </Link>
-        </Stack>
     );
 }
 

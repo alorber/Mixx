@@ -43,11 +43,13 @@ export type Ingredient = {
 };
 
 export type CATEGORIES = 'Spirits' | 'Liqueurs' | 'Wines and Champagnes' | 'Beers and Ciders' | 'Mixers' | 'Other';
+export const CATEGORIES_LIST = ['Spirits', 'Liqueurs', 'Wines and Champagnes', 'Beers and Ciders', 'Mixers', 'Other'];
 export type CategorizedIngredients = {
    [key in string]: {
        [key: string]: [{
            name: string,
-           id: string
+           id: string,
+           owned?: boolean
        }]
    }
 };

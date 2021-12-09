@@ -12,8 +12,6 @@ import {
     } from '@chakra-ui/react';
 
 const HomeLayout = () => {
-    console.log("hey");
-
     return (
         <Stack spacing={10} justifyContent='center'>
             {/* Intro & Sign In Button */}
