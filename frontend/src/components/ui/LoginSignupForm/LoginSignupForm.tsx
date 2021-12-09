@@ -82,7 +82,7 @@ const LoginSignupForm = ({updateLoggedIn}: {updateLoggedIn: (l: boolean) => void
                                     {/* Last Name Field */}
                                     <FormControl isRequired>
                                         <FormLabel>Last Name</FormLabel>
-                                        <Input type="name" placeholder="Sparks" value={formValues.email}
+                                        <Input type="name" placeholder="Sparks" value={formValues.lastName}
                                             aria-label="Email"  borderColor="#b7e0ff" _hover={{borderColor: "#2395FF"}}
                                             onChange={e => updateForm('lastName', e.currentTarget.value)}
                                             focusBorderColor="#2395ff"/>
