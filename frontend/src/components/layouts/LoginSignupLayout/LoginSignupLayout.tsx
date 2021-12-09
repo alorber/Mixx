@@ -7,8 +7,8 @@ import {
     Stack,
     Text
     } from '@chakra-ui/react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const LoginSignupLayout = ({isLoggedIn, updateLoggedIn}: {isLoggedIn: boolean, updateLoggedIn: (l: boolean) => void}) => {
     const navigate = useNavigate();
@@ -28,10 +28,10 @@ const LoginSignupLayout = ({isLoggedIn, updateLoggedIn}: {isLoggedIn: boolean, u
                 <Heading size='lg' my={10}>Why Sign Up?</Heading>
                 <Grid templateColumns={["repeat(1,auto)","repeat(1,auto)","repeat(2,auto)","repeat(2,auto)"]}
                           w="fill" align="center" justifyContent='center' pl={14}>
-                    <FeatureItem imgSource='/Images/Ingredients.png' imgSize={'300px'} featureText="Save your ingredients to your account" />
-                    <FeatureItem imgSource='/Images/Cocktail.png' imgSize={'300px'} featureText="Quickly view all the cocktails you can make" />
-                    <FeatureItem imgSource='/Images/Heart_Cocktail.png' imgSize={'300px'} featureText="Favorite cocktails for easy access" />
-                    <FeatureItem imgSource='/Images/Groceries.png' imgSize={'300px'} featureText="Get recommendations on your next ingredient purchase" />
+                    <FeatureItem imgSource='/Icons/Ingredients.png' imgSize={'300px'} featureText="Save your ingredients to your account" />
+                    <FeatureItem imgSource='/Icons/Cocktail.png' imgSize={'300px'} featureText="Quickly view all the cocktails you can make" />
+                    <FeatureItem imgSource='/Icons/Heart_Cocktail.png' imgSize={'300px'} featureText="Favorite cocktails for easy access" />
+                    <FeatureItem imgSource='/Icons/Groceries.png' imgSize={'300px'} featureText="Get recommendations on your next ingredient purchase" />
                 </Grid>
             </Stack>
         </Stack>

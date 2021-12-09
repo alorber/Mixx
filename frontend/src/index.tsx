@@ -1,13 +1,20 @@
+import App from './components/App/App';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './components/App/App';
 import reportWebVitals from './reportWebVitals';
-import {ChakraProvider, theme} from "@chakra-ui/react"
+import { ChakraProvider, extendTheme, theme } from '@chakra-ui/react';
+import './index.css';
+
+const newTheme = extendTheme({
+  fonts: {
+    heading: 'Comfortaa',
+    body: 'Comfortaa'
+  }
+})
 
 ReactDOM.render(
   <React.StrictMode>
-    <ChakraProvider theme={theme}>
+    <ChakraProvider theme={newTheme}>
       <App />
     </ChakraProvider>
   </React.StrictMode>,

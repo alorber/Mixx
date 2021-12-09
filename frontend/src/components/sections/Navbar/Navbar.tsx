@@ -41,7 +41,7 @@ const Navbar = ({ isLoggedIn }: NavbarProps) => {
           {/* Logo / Home Button */}
           <Flex justifySelf={{ base: 'center', md: 'left' }}>
             <NavbarLink linkTo={"/"} onPageChange={closeNavbar}>
-              <Image src="images/Cocktail_Shaker.png" width="3em" />
+              <Image src="Icons/Cocktail_Shaker.png" width="3em" />
             </NavbarLink>
           </Flex>
           {/* Desktop Navbar Links */}
