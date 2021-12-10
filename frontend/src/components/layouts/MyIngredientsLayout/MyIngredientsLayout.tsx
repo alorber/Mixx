@@ -20,6 +20,7 @@ import {
 
 const MyIngredientsLayout = () => {
     const [isLoading, setIsloading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false); 
     const [ingredientsList, setIngredientsList] = useState<CategorizedIngredients | null>(null);
     const [userIngredientIDs, setUserIngredientIDs] = useState<string[] | null>(null);
     const [categorizedUserIngredientsList, setCategorizedUserIngredientsList] = useState<CategorizedIngredients | null>(null);
@@ -163,7 +164,7 @@ const MyIngredientsLayout = () => {
             return;
         }
 
-        setIsloading(true);
+        setIsSaving(true);
         const resp = await updateUserIngredients(addedIngredientIDs, removedIngredientIDs);
         if(resp.status === 'Success') {
             setAddedIngredientIDs([]);
@@ -172,16 +173,20 @@ const MyIngredientsLayout = () => {
         } else {
             setUserIngredientsErrorCode(resp.errorCode);
         }
-        setIsloading(false);
+        setIsSaving(false);
     }
 
     return isLoading ? (
         <Heading pt={10}>Loading Ingredients...</Heading>
+    ) : isSaving ? (
+        <Heading pt={10}>Saving Ingredients...</Heading>
     ) : ingredientsList !== null && categorizedUserIngredientsList !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
         <Stack h='100%' w='100%'>
             <Heading size='lg' mt={10} px={4}>Let us know what you have in your kitchen</Heading>
             <Flex w='100%' justifyContent='center' pt={6}>
-                <Button type='submit' w='60%' maxW={1000} onClick={saveIngredients}>
+                <Button type='submit' w='60%' maxW={1000} onClick={saveIngredients} boxShadow='sm' 
+                        backgroundColor={"#b7e0ff"} _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} 
+                        _focus={{outline: "none"}}>
                     Save Ingredients
                 </Button>
             </Flex>
@@ -202,10 +207,14 @@ const MyIngredientsLayout = () => {
             </Stack>
             <Stack h='85%' w={'100%'} spacing={4} px={10} display={['flex', 'flex', 'none', 'none']} pt={8}>
                 <ButtonGroup isAttached w='100%'>
-                    <Button w='50%' onClick={(e) => {e.preventDefault(); setSelectedList('All')}}>
+                    <Button w='50%' onClick={(e) => {e.preventDefault(); setSelectedList('All')}}
+                    boxShadow='sm' backgroundColor={selectedList === 'All' ? '#2395FF' : '#EAF6FF'} _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} 
+                    _focus={{outline: "none"}}>
                         All Ingredients
                     </Button>
-                    <Button w='50%' onClick={(e) => {e.preventDefault(); setSelectedList('Owned')}}>
+                    <Button w='50%' onClick={(e) => {e.preventDefault(); setSelectedList('Owned')}}
+                    boxShadow='sm' backgroundColor={selectedList === 'Owned' ? '#2395FF' : '#EAF6FF'} _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} 
+                    _focus={{outline: "none"}}>
                         My Ingredients
                     </Button>
                 </ButtonGroup>

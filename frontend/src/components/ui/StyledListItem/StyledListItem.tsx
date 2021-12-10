@@ -8,7 +8,7 @@ import {
     Stack,
     Text
     } from '@chakra-ui/react';
-import { ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
+import { AddIcon, ChevronDownIcon, ChevronRightIcon, MinusIcon } from '@chakra-ui/icons';
 
 type StyledListItemProps = {
     isItemDropdown?: boolean,  // Does this list item open another list
@@ -36,7 +36,7 @@ const StyledListItem = ({isItemDropdown = false, showDropdownIcon = false, isDro
         <Stack direction={'row'} align={'center'}>
             {/* Link Label */}
             <Box>
-                <Text transition={'all .3s ease'} _groupHover={{color: '#2395ff'}} fontWeight={500}>
+                <Text transition={'all .3s ease'} _groupHover={{color: hoverIconType !== ChevronRightIcon ? '#FFFFFF' : '#2395ff'}} fontWeight={500}>
                     {children}
                 </Text>
             </Box>
@@ -44,7 +44,8 @@ const StyledListItem = ({isItemDropdown = false, showDropdownIcon = false, isDro
             <Flex transition={'all .3s ease'} transform={'translateX(-10px)'} opacity={0}
                     _groupHover={{opacity: '100%', transform: "translateX(0)"}} justify={'flex-end'}
                     align={'center'} flex={1}>
-                <Icon color={'#2395ff'} w={5} h={5} as={hoverIconType} />
+                <Icon color={hoverIconType !== ChevronRightIcon ? '#FFFFFF' : '#2395ff'} 
+                        w={5} h={5} as={hoverIconType} />
             </Flex>
         </Stack>
     );

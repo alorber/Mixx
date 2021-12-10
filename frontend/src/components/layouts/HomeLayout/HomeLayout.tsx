@@ -15,14 +15,14 @@ const HomeLayout = () => {
     return (
         <Stack spacing={10} justifyContent='center'>
             {/* Intro & Sign In Button */}
-            <Heading mt={6}>
+            <Heading mt={6} px={6}>
                 Welcome To Mixx!
             </Heading>
-            <Heading size='lg'>
+            <Heading size='lg' px={6}>
                 Mixx is a new tool that will bring your home-bartending
                 skills to a whole new level.
             </Heading>
-            <Heading size='lg'>
+            <Heading size='lg' px={6}>
                 You bring the ingredients and we'll bring the recipes!
             </Heading>
             <Flex justifyContent='center' pt={4}>

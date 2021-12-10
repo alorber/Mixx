@@ -86,7 +86,7 @@ const IngredientsListItem = (
     return (
         <Stack spacing={4} w='100%'>
             <Link _focus={{outline: "none"}} role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
-                    _hover={{textDecoration: "none", bg: "#eaf6ff"}} onClick={(e) => {e.preventDefault(); 
+                    _hover={{textDecoration: "none", bg: ingredient.owned ? '#E5A5A6' : '#A8E28E'}} onClick={(e) => {e.preventDefault(); 
                     onClick(ingredient.id)}}>
                 <StyledListItem hoverIconType={
                     ingredient.hasOwnProperty('owned') ? (ingredient.owned ? MinusIcon : AddIcon) : undefined}>
