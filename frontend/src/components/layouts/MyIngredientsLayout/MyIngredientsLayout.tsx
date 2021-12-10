@@ -5,7 +5,6 @@ import {
     CategorizedIngredients,
     getCategorizedIngredients,
     getCurrentUserIngredients,
-    Ingredient,
     updateUserIngredients
     } from '../../../services/api';
 import { useEffect, useState } from 'react';

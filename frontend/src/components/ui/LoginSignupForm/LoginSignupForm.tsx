@@ -54,6 +54,7 @@ const LoginSignupForm = ({updateLoggedIn}: {updateLoggedIn: (l: boolean) => void
             clearForm()
             setErrorCode(resp.errorCode)
         }
+        setIsLoading(false);
     }
 
     const headerText = formType === "Signup" ? "Sign Up" : "Welcome Back";

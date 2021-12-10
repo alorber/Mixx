@@ -10,7 +10,7 @@ import {
     } from '@chakra-ui/react';
 import {
     CATEGORIES_LIST,
-    CategorizedIngredients, Ingredient,
+    CategorizedIngredients,
     } from '../../../services/api';
 
 type IngredientsListProps = {

@@ -241,7 +241,7 @@ export async function getPossibleCocktails(): Promise<{cocktails: Cocktail[], st
 }
 
 // Get All Cocktails
-export async function getAllCocktails(): Promise<{cocktails: Cocktail[]} | Failure> {
+export async function getAllCocktails(): Promise<{cocktails: Cocktail[], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails`, {
         method: 'GET',
         credentials: "include"
@@ -249,7 +249,7 @@ export async function getAllCocktails(): Promise<{cocktails: Cocktail[]} | Failu
 
     if(resp.ok) {
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
-        return {cocktails: resp_data.cocktails}
+        return {cocktails: resp_data.cocktails, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
@@ -307,7 +307,7 @@ export async function likeCocktail(cocktailID: string): Promise<StatusResponse> 
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
@@ -324,7 +324,7 @@ export async function removeLikedCocktail(cocktailID: string): Promise<StatusRes
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
@@ -341,7 +341,7 @@ export async function dislikeCocktail(cocktailID: string): Promise<StatusRespons
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
@@ -358,7 +358,7 @@ export async function removeDislikedCocktail(cocktailID: string): Promise<Status
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
@@ -405,7 +405,7 @@ export async function favoriteCocktail(cocktailID: string): Promise<StatusRespon
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
@@ -422,7 +422,7 @@ export async function unfavoriteCocktail(cocktailID: string): Promise<StatusResp
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
