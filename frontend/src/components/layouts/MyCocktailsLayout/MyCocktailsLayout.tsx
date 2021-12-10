@@ -4,10 +4,10 @@ import { Box, Heading, Stack } from '@chakra-ui/react';
 import { Cocktail, favoriteCocktail, getFavoritedCocktails, getPossibleCocktails, unfavoriteCocktail } from '../../../services/api';
 
 type MyCocktailsLayoutProps = {
-
+    checkLoggedIn: () => void,
 }
 
-const MyCocktailsLayout = ({}: MyCocktailsLayoutProps) => {
+const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [cocktailsList, setCocktailsList] = useState<Cocktail[] | null>(null);
     const [favoriteCocktailsList, setFavoriteCocktailsList] = useState<string[]>([]);
@@ -21,11 +21,13 @@ const MyCocktailsLayout = ({}: MyCocktailsLayoutProps) => {
             return resp.cocktails;
         } else {
             setErrorCode(resp.errorCode);
+            checkLoggedIn();
             return null;
         }
     }
 
     const getSavedCocktails = async () => {
+        checkLoggedIn();
         const resp = await getFavoritedCocktails();
         if(resp.status == "Success") {
             setFavoriteCocktailsList(resp.cocktailIDs);
@@ -33,6 +35,7 @@ const MyCocktailsLayout = ({}: MyCocktailsLayoutProps) => {
             return resp.cocktailIDs;
         } else {
             setErrorCode(resp.errorCode);
+            checkLoggedIn();
             return null;
         }
     }
@@ -55,8 +58,6 @@ const MyCocktailsLayout = ({}: MyCocktailsLayoutProps) => {
             const isC2Favorited = favorites?.includes(c2._id);
 
             // Both favorited or neither
-            console.log(`HERE ${isC1Favorited} ${isC2Favorited}`)
-            console.log(`LIST: ${favorites}`)
             if((isC1Favorited && isC2Favorited) || (!isC1Favorited && !isC2Favorited)) {
                 // Sort alphabetically
                 return c1.name.toLowerCase() < c2.name.toLowerCase() ? -1 : 1;
@@ -79,6 +80,7 @@ const MyCocktailsLayout = ({}: MyCocktailsLayoutProps) => {
             sortCocktails(cocktailsList, [...favoriteCocktailsList, cocktailID]);
         } else {
             setErrorCode(resp.errorCode);
+            checkLoggedIn();
         }
     }
 
@@ -90,10 +92,12 @@ const MyCocktailsLayout = ({}: MyCocktailsLayoutProps) => {
             sortCocktails(cocktailsList, favoriteCocktailsList.filter(id => id !== cocktailID));
         } else {
             setErrorCode(resp.errorCode);
+            checkLoggedIn();
         }
     }
 
     const toggleFavorite = (cocktailID: string) => {
+        checkLoggedIn();
         if(favoriteCocktailsList.includes(cocktailID)) {
             setUnfavorite(cocktailID);
         } else {

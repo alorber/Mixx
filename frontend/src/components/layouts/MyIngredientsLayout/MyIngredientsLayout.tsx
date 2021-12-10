@@ -17,7 +17,12 @@ import {
     Stack,
     } from '@chakra-ui/react';
 
-const MyIngredientsLayout = () => {
+type MyIngredientsLayoutProps = {
+    checkLoggedIn: () => void,
+}
+
+
+const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
     const [isLoading, setIsloading] = useState(false);
     const [isSaving, setIsSaving] = useState(false); 
     const [ingredientsList, setIngredientsList] = useState<CategorizedIngredients | null>(null);
@@ -99,6 +104,7 @@ const MyIngredientsLayout = () => {
 
     // Get User's Ingredients
     const getUserIngredients = async () => {
+        checkLoggedIn();
         const resp = await getCurrentUserIngredients()
         if(resp.status === "Success") {
             setUserIngredientIDs(resp.ingredientIDs);
@@ -107,6 +113,7 @@ const MyIngredientsLayout = () => {
         // Error
         else {
             setUserIngredientsErrorCode(resp.errorCode);
+            checkLoggedIn();
         }
     }
 
@@ -158,6 +165,8 @@ const MyIngredientsLayout = () => {
 
     // Save ingredient list changes
     const saveIngredients = async () => {
+        checkLoggedIn();
+
         if(addedIngredientIDs.length === 0 && removedIngredientIDs.length === 0) {
             return;
         }
@@ -171,6 +180,7 @@ const MyIngredientsLayout = () => {
             setUserIngredientIDs(resp.ingredientIDs);
         } else {
             setUserIngredientsErrorCode(resp.errorCode);
+            checkLoggedIn();
         }
         setIsSaving(false);
     }

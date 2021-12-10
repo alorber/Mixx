@@ -83,6 +83,14 @@ export function isLoggedIn(): boolean {
     return getUserID() !== '';
 }
 
+// Checks user auth
+function checkUserAuth(errorCode: number): void {
+    // If auth error, sign out
+    if(errorCode === 401) {
+        setUserID('');
+    }
+}
+
 // Signup
 export async function signup(email: string, password: string, firstName: string, lastName: string): Promise<LoginResponse> {
     const resp = await fetch(`${BACKEND_URL}/signup`, {
@@ -170,6 +178,7 @@ export async function updateEmail(newEmail: string, password: string): Promise<S
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -187,6 +196,7 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -203,6 +213,7 @@ export async function getCurrentUserIngredients(): Promise<{ingredientIDs: strin
         const resp_data: {ingredientIDs: string[]} = await resp.json();
         return {ingredientIDs: resp_data.ingredientIDs, status: "Success"}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -221,6 +232,7 @@ export async function updateUserIngredients(newIngredients: string[], removedIng
         const resp_data: {ingredientIDs: string[]} = await resp.json();
         return {ingredientIDs: resp_data.ingredientIDs, status: "Success"}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -236,6 +248,7 @@ export async function getPossibleCocktails(): Promise<{cocktails: Cocktail[], st
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
         return {cocktails: resp_data.cocktails, status: "Success"}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -314,6 +327,7 @@ export async function likeCocktail(cocktailID: string): Promise<StatusResponse> 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -331,6 +345,7 @@ export async function removeLikedCocktail(cocktailID: string): Promise<StatusRes
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -348,6 +363,7 @@ export async function dislikeCocktail(cocktailID: string): Promise<StatusRespons
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -365,6 +381,7 @@ export async function removeDislikedCocktail(cocktailID: string): Promise<Status
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -380,6 +397,7 @@ export async function getLikedCocktails(): Promise<{cocktails: Cocktail[]} | Fai
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
         return {cocktails: resp_data.cocktails}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -395,6 +413,7 @@ export async function getDislikedCocktails(): Promise<{cocktails: Cocktail[]} | 
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
         return {cocktails: resp_data.cocktails}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -412,6 +431,7 @@ export async function favoriteCocktail(cocktailID: string): Promise<StatusRespon
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -429,6 +449,7 @@ export async function unfavoriteCocktail(cocktailID: string): Promise<StatusResp
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -444,6 +465,7 @@ export async function getFavoritedCocktails(): Promise<{cocktailIDs: string[], s
         const resp_data: {cocktails: [string]} = await resp.json();
         return {cocktailIDs: resp_data.cocktails, status: "Success"}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }

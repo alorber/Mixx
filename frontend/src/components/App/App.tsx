@@ -13,12 +13,18 @@ import './App.css';
 const App = () => {
   const [loggedIn, updateLoggedIn] = useState(false);
 
+  const checkLoggedIn = () => {
+    console.log(isLoggedIn());
+    updateLoggedIn(isLoggedIn());
+  }
+
   useEffect(() => {
-    updateLoggedIn(isLoggedIn())
+    checkLoggedIn();
   }, [updateLoggedIn]);
 
   const showIfLoggedIn = (component: JSX.Element) => {
-    return loggedIn ? component : < LoginSignupLayout isLoggedIn={loggedIn} updateLoggedIn={updateLoggedIn} />
+    return loggedIn ? component : < LoginSignupLayout isLoggedIn={loggedIn} updateLoggedIn={updateLoggedIn} 
+                                      checkLoggedIn={checkLoggedIn} />
   }
 
   return (
@@ -26,11 +32,12 @@ const App = () => {
       <Stack className="App" h={'100%'}>
         <Navbar isLoggedIn={loggedIn}/>
         <Routes>
-          <Route path='/' element={<HomeLayout />}/>
-          <Route path='/login' element={<LoginSignupLayout isLoggedIn={loggedIn} updateLoggedIn={updateLoggedIn} />}/>
-          <Route path='/my_ingredients' element={showIfLoggedIn(<MyIngredientsLayout />)}/>
-          <Route path='/my_cocktails' element={showIfLoggedIn(<MyCocktailsLayout />)}/>
-          <Route path='/my_favorites' element={showIfLoggedIn(<MyFavoritesLayout />)}/>
+          <Route path='/' element={<HomeLayout checkLoggedIn={checkLoggedIn} />}/>
+          <Route path='/login' element={<LoginSignupLayout isLoggedIn={loggedIn} updateLoggedIn={updateLoggedIn}
+                                          checkLoggedIn={checkLoggedIn} />}/>
+          <Route path='/my_ingredients' element={showIfLoggedIn(<MyIngredientsLayout checkLoggedIn={checkLoggedIn} />)}/>
+          <Route path='/my_cocktails' element={showIfLoggedIn(<MyCocktailsLayout checkLoggedIn={checkLoggedIn} />)}/>
+          <Route path='/my_favorites' element={showIfLoggedIn(<MyFavoritesLayout checkLoggedIn={checkLoggedIn} />)} />
           <Route path='/ingredients/:ingredient_id' element={<></>}/>
           <Route path='/ingredients' element={<></>}/>
           <Route path='/cocktails/:cocktail_id' element={<></>}/>
