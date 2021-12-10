@@ -48,6 +48,15 @@ def get_check_password(user_id, password):
     hashed_password = user_db.find_one({"_id": ObjectId(user_id)}, {'password': 1})['password']
     return bcrypt.check_password_hash(hashed_password, password)
 
+# Converts cocktail DB response to JSON
+def cocktails_to_json(cocktails):
+    for cocktail in cocktails:
+        cocktail['_id'] = str(cocktail['_id'])
+        cocktail['glass'] = str(cocktail['glass'])
+        for ingredient in cocktail['ingredients']:
+            ingredient['ingredient'] = str(ingredient['ingredient'])
+    return cocktails
+
 # ------ Routing ------
 
 # Signup
@@ -251,12 +260,12 @@ def get_possible_cocktails(user_id):
         }
     ]))
     
-    return {'cocktails': cocktails}, 200
+    return {'cocktails': cocktails_to_json(cocktails)}, 200
 
 # Get All Cocktails
 @app.route('/cocktails', methods=['Get'])
 def get_all_cocktails():
-    return {'cocktails': list(cocktail_db.find({}))}, 200
+    return {'cocktails': cocktails_to_json(list(cocktail_db.find({})))}, 200
 
 # Get Specific Cocktail's Info
 @app.route('/cocktails/<cocktail_id>', methods=['Get'])
@@ -480,7 +489,7 @@ def get_favorited_cocktails(user_id):
     
     favorite_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'favorite_cocktails': 1})['favorite_cocktails']
 
-    return {'cocktails': favorite_cocktails}, 200
+    return {'cocktails': [str(cocktail) for cocktail in favorite_cocktails] or []}, 200
 
 if __name__ == "__main__":
     app.run(debug=True)

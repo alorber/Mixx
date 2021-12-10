@@ -103,7 +103,7 @@ const MyCocktailsLayout = ({}: MyCocktailsLayoutProps) => {
 
     return (
         <Stack h='100%' w='100%'>
-            <Heading size='lg' mt={10} px={4}>My Cocktails</Heading>
+            <Heading size='lg' mt={10} px={4}>Here are some cocktails that you can make</Heading>
             {isLoading ? (
                 <Stack p={8} maxW={700} w={'100%'} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
                         overflowY={'auto'} style={{marginLeft: 'auto', marginRight: 'auto', marginTop: 60}}>

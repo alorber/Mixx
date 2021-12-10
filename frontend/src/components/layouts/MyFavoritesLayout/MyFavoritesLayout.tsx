@@ -88,7 +88,7 @@ const MyFavoritesLayout = () => {
 
     return (
         <Stack h='100%' w='100%'>
-            <Heading size='lg' mt={10} px={4}>My Favorites</Heading>
+            <Heading size='lg' mt={10} px={4}>Check out your favorite cocktails</Heading>
             {isLoading ? (
                 <Stack p={8} maxW={700} w={'100%'} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
                         overflowY={'auto'} style={{marginLeft: 'auto', marginRight: 'auto', marginTop: 60}}>
