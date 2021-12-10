@@ -5,71 +5,82 @@ import {
     CategorizedIngredients,
     getCategorizedIngredients,
     getCurrentUserIngredients,
-    Ingredient
+    Ingredient,
+    updateUserIngredients
     } from '../../../services/api';
 import { useEffect, useState } from 'react';
 import {
     Box,
+    Button,
+    ButtonGroup,
+    Flex,
     Heading,
-    Text,
+    Stack,
     } from '@chakra-ui/react';
 
 const MyIngredientsLayout = () => {
     const [isLoading, setIsloading] = useState(false);
     const [ingredientsList, setIngredientsList] = useState<CategorizedIngredients | null>(null);
-    const [userIngredientsList, setUserIngredientsList] = useState<[Ingredient] | null>(null);
+    const [userIngredientIDs, setUserIngredientIDs] = useState<string[] | null>(null);
     const [categorizedUserIngredientsList, setCategorizedUserIngredientsList] = useState<CategorizedIngredients | null>(null);
-    const [addedIngredients, setAddedIngredients] = useState<[Ingredient] | []>([]);
-    const [removedIngredients, setRemovedIngredients] = useState<[Ingredient] | []>([]);
+    const [addedIngredientIDs, setAddedIngredientIDs] = useState<string[]>([]);
+    const [removedIngredientIDs, setRemovedIngredientIDs] = useState<string[]>([]);
     const [allIngredientsErrorCode, setAllIngredientsErrorCode] = useState<number | null>(null);
     const [userIngredientsErrorCode, setUserIngredientsErrorCode] = useState<number | null>(null);
+    const [selectedList, setSelectedList] = useState<'All' | 'Owned'>('All');
 
     // Marks user ingredients in master list
     const markUserIngredients = () => {
-        if(ingredientsList === null || userIngredientsList === null) {
+        if(ingredientsList == null || userIngredientIDs == null) {
             return
         }
-
-        const userIngredientsIDs = userIngredientsList.map(userIngredient => userIngredient['_id'])
 
         for(const category in ingredientsList) {
             for(const subcategory in ingredientsList[category]) {
                 for(const ingredient of ingredientsList[category][subcategory]) {
-                    ingredient['owned'] = userIngredientsIDs.includes(ingredient.id);
+                    ingredient['owned'] = userIngredientIDs.includes(ingredient.id);
                 }
             }
         }
     }
 
-    // Restructures user ingredients to be compatible with list coponent
+    // Restructures user ingredients to be compatible with list component
     const restructureUserList = () => {
-        if(userIngredientsList === null) {
+        if(userIngredientIDs == null) {
             return;
+        }
+        if(userIngredientIDs.length === 0) {
+            setCategorizedUserIngredientsList({});
         }
 
         // Adds categories in order
-        const restructuredUserList = CATEGORIES_LIST.reduce(
+        const userIngredientsList = CATEGORIES_LIST.reduce(
             (ingredients:CategorizedIngredients, category:string) => {ingredients[category] = {}; return ingredients;}, {}
         );
         
-        // Adds restructured ingredients
-        for(const ingredient of userIngredientsList) {
-            const restructuredIngredient = {id: ingredient._id, name: ingredient.name, owned: true};
-            if(!restructuredUserList[ingredient.category].hasOwnProperty(ingredient.subcategory)) {
-                restructuredUserList[ingredient.category][ingredient.subcategory] = [restructuredIngredient];
-            } else {
-                restructuredUserList[ingredient.category][ingredient.subcategory].push(restructuredIngredient);
+        // Adds owned ingredients
+        for(const category in ingredientsList) {
+            for(const subcategory in ingredientsList[category]) {
+                for(const ingredient of ingredientsList[category][subcategory]) {
+                    if(ingredient.owned) {
+                        if(!userIngredientsList[category].hasOwnProperty(subcategory)) {
+                            userIngredientsList[category][subcategory] = [ingredient];
+                        } else {
+                            userIngredientsList[category][subcategory].push(ingredient);
+                        }
+                    }
+                }
             }
         }
 
         // Removes empty categories
-        for(const category in restructuredUserList) {
-            if(Object.keys(restructuredUserList[category]).length === 0) {
-                delete restructuredUserList[category];
+        for(const category in userIngredientsList) {
+            if(Object.keys(userIngredientsList[category]).length === 0) {
+                delete userIngredientsList[category];
             }
         }
 
-        setCategorizedUserIngredientsList(restructuredUserList);
+        setCategorizedUserIngredientsList(userIngredientsList);
     }
 
     // Get List of Ingredients
@@ -90,7 +101,7 @@ const MyIngredientsLayout = () => {
     const getUserIngredients = async () => {
         const resp = await getCurrentUserIngredients()
         if(resp.status === "Success") {
-            setUserIngredientsList(resp.ingredients);
+            setUserIngredientIDs(resp.ingredientIDs);
             setUserIngredientsErrorCode(null);
         }
         // Error
@@ -108,21 +119,113 @@ const MyIngredientsLayout = () => {
 
     // Check if received lists
     useEffect(() => {
-        if(ingredientsList !== null && userIngredientsList !== null) {
+        if(ingredientsList !== null && userIngredientIDs !== null) {
+            setIsloading(true)
             markUserIngredients();
             restructureUserList();
             setIsloading(false);
         }
-    }, [ingredientsList, userIngredientsList])
+    }, [ingredientsList, userIngredientIDs])
+
+    // Add ingredient to user's list
+    const addIngredient = (ingredientID: string) => {
+        // Check if in removed list
+        if(removedIngredientIDs.includes(ingredientID)) {
+            setRemovedIngredientIDs(removedIngredientIDs.filter(id => id !== ingredientID));
+        } else {
+            // Add to added list
+            setAddedIngredientIDs([...addedIngredientIDs, ingredientID]);
+        }
+
+        if(userIngredientIDs != null) {
+            setUserIngredientIDs([...userIngredientIDs, ingredientID]);
+        }
+    }
+
+    // Remove ingredient from user's list
+    const removeIngredient = (ingredientID: string) => {
+        // Check if in added list
+        if(addedIngredientIDs.includes(ingredientID)) {
+            setAddedIngredientIDs(addedIngredientIDs.filter(id => id !== ingredientID));
+        } else {
+            // Add to removed list
+            setRemovedIngredientIDs([...removedIngredientIDs, ingredientID]);
+        }
+
+        if(userIngredientIDs !== null) {
+            setUserIngredientIDs(userIngredientIDs.filter((id: string) => id !== ingredientID));
+        }
+    }
+
+    // Save ingredient list changes
+    const saveIngredients = async () => {
+        if(addedIngredientIDs.length === 0 && removedIngredientIDs.length === 0) {
+            return;
+        }
+
+        setIsloading(true);
+        const resp = await updateUserIngredients(addedIngredientIDs, removedIngredientIDs);
+        if(resp.status === 'Success') {
+            setAddedIngredientIDs([]);
+            setRemovedIngredientIDs([]);
+            setUserIngredientIDs(resp.ingredientIDs);
+        } else {
+            setUserIngredientsErrorCode(resp.errorCode);
+        }
+        setIsloading(false);
+    }
 
     return isLoading ? (
-        <Heading pt={10}>Loading...</Heading>
-    ) : ingredientsList !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
-        <Box pt={10} w='100%' h='100%' justifyContent='center'>
-            <IngredientsList ingredientsList={ingredientsList} />
-        </Box>
+        <Heading pt={10}>Loading Ingredients...</Heading>
+    ) : ingredientsList !== null && categorizedUserIngredientsList !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
+        <Stack h='100%' w='100%'>
+            <Heading size='lg' mt={10} px={4}>Let us know what you have in your kitchen</Heading>
+            <Flex w='100%' justifyContent='center' pt={6}>
+                <Button type='submit' w='60%' maxW={1000} onClick={saveIngredients}>
+                    Save Ingredients
+                </Button>
+            </Flex>
+            <Stack direction={'row'} h='85%' w='100%' maxW={1500} spacing={4} px={10} 
+                    display={['none', 'none', 'flex', 'flex']} style={{marginLeft: 'auto', marginRight: 'auto'}}>
+                <Stack w='100%' h='100%' mt={12}>
+                    <Heading size='md'>All Ingredients</Heading>
+                    <Box w='100%' h='100%'>
+                        <IngredientsList ingredientsList={ingredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                    </Box> 
+                </Stack>
+                <Stack w='100%' h='100%' style={{marginTop: '3em'}}>
+                    <Heading size='md'>My Ingredients</Heading>
+                    <Box w='100%' h='100%'>
+                        <IngredientsList ingredientsList={categorizedUserIngredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                    </Box>
+                </Stack>
+            </Stack>
+            <Stack h='85%' w={'100%'} spacing={4} px={10} display={['flex', 'flex', 'none', 'none']} pt={8}>
+                <ButtonGroup isAttached w='100%'>
+                    <Button w='50%' onClick={(e) => {e.preventDefault(); setSelectedList('All')}}>
+                        All Ingredients
+                    </Button>
+                    <Button w='50%' onClick={(e) => {e.preventDefault(); setSelectedList('Owned')}}>
+                        My Ingredients
+                    </Button>
+                </ButtonGroup>
+                {selectedList === 'All' ? (
+                    <Box w='100%' h='100%'>
+                        <IngredientsList ingredientsList={ingredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                    </Box>
+                ) : (
+                    <Box w='100%' h='100%'>
+                        <IngredientsList ingredientsList={categorizedUserIngredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                    </Box>
+                )}
+            </Stack>
+        </Stack>
     ) : (
-        <Text>Error</Text>
+        <Stack p={8} maxW={700} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
+                overflowY={'auto'} style={{marginLeft: 'auto', marginRight: 'auto', marginTop: 60}}>
+            <Heading size='lg'>Error: Unable to load ingredients.</Heading>
+            <Heading size='lg'>Please try again later.</Heading>
+        </Stack>
     );
 }
 

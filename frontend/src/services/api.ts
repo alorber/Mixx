@@ -62,7 +62,7 @@ export type Cocktail = {
     img: string;
     subtitle: string | null;
     name: string;
-    ingredients: [Ingredient];
+    ingredients: Ingredient[];
 }
 
 // Functions
@@ -192,7 +192,7 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
 }
 
 // Get Current User Ingredients
-export async function getCurrentUserIngredients(): Promise<{ingredients: [Ingredient], status: "Success"} | Failure> {
+export async function getCurrentUserIngredients(): Promise<{ingredientIDs: string[], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients`, {
         method: 'GET',
         mode: 'cors',
@@ -200,15 +200,15 @@ export async function getCurrentUserIngredients(): Promise<{ingredients: [Ingred
     });
 
     if(resp.ok) {
-        const resp_data: {ingredients: [Ingredient]} = await resp.json();
-        return {ingredients: resp_data.ingredients, status: "Success"}
+        const resp_data: {ingredientIDs: string[]} = await resp.json();
+        return {ingredientIDs: resp_data.ingredientIDs, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Update User Ingredients
-export async function updateUserIngredients(newIngredients: [Ingredient], removedIngredients: [Ingredient]): Promise<{ingredients: [Ingredient]} | Failure> {
+export async function updateUserIngredients(newIngredients: string[], removedIngredients: string[]): Promise<{ingredientIDs: string[], status: 'Success'} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/update`, {
         method: 'POST',
         mode: 'cors',
@@ -218,8 +218,8 @@ export async function updateUserIngredients(newIngredients: [Ingredient], remove
     });
 
     if(resp.ok) {
-        const resp_data: {ingredients: [Ingredient]} = await resp.json();
-        return {ingredients: resp_data.ingredients}
+        const resp_data: {ingredientIDs: string[]} = await resp.json();
+        return {ingredientIDs: resp_data.ingredientIDs, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }

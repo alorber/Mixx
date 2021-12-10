@@ -183,8 +183,8 @@ def get_user_ingredients(user_id):
         # ERROR: Unauthorized
         return {}, 401
 
-    ingredients = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
-    return {'ingredients': ingredients}, 200
+    ingredientIDs = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
+    return {'ingredientIDs': [str(ingredientID) for ingredientID in ingredientIDs]}, 200
 
 # Update User Ingredients
 @app.route('/user/<user_id>/ingredients/update', methods=['POST'])
@@ -199,15 +199,18 @@ def update_user_ingredients(user_id):
     new_ingredients = [ObjectId(ingr_id) for ingr_id in update_info['newIngredients']]
     removed_ingredients = [ObjectId(ingr_id) for ingr_id in update_info['removedIngredients']]
     
-    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, [
-        {'$addToSet': {'ingredients': {'$each': new_ingredients}}},
-        {'$pull': {'ingredients': {'$in': removed_ingredients}}}
-        ])
+    modified_cnt = 0
+    modified_cnt += user_db.update_one({'_id': ObjectId(user_id)}, {
+        '$addToSet': {'ingredients': {'$each': new_ingredients}},
+    }).modified_count
+    modified_cnt += user_db.update_one({'_id': ObjectId(user_id)}, {
+        '$pull': {'ingredients': {'$in': removed_ingredients}}
+    }).modified_count
     
      # Check for success
-    if update_resp.modified_count > 0:
-        ingredients = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
-        return {'ingredients': ingredients}, 200
+    if modified_cnt > 0:
+        ingredientIDs = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
+        return {'ingredients': [str(ingredientID) for ingredientID in ingredientIDs]}, 200
     else:
         # Database Error
         return {}, 500
