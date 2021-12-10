@@ -9,6 +9,7 @@ import {
     useDisclosure
     } from '@chakra-ui/react';
 import {
+    CATEGORIES_LIST,
     CategorizedIngredients, Ingredient,
     } from '../../../services/api';
 
@@ -25,10 +26,12 @@ const IngredientsList = ({ingredientsList, addIngredient, removeIngredient}: Ing
             {Object.keys(ingredientsList).length === 0 ? (
                 <Heading size='lg'>No Ingredients to Display</Heading>
             ) : (
-                Object.keys(ingredientsList).map((category: string) => (
-                    <CategoryListItem key={category} categoryIngredientsList={ingredientsList[category]} 
-                        category={category} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
-                ))
+                CATEGORIES_LIST.map((category: string) => (
+                    ingredientsList.hasOwnProperty(category) ?
+                        <CategoryListItem key={category} categoryIngredientsList={ingredientsList[category]} 
+                            category={category} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                    : null )
+                )
             )}
         </Stack>
     );
