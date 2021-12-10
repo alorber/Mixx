@@ -54,6 +54,12 @@ export type CategorizedIngredients = {
    }
 };
 
+export type RecipeStep = {
+    ingredient: string,
+    quantity: string,
+    unit: string
+}
+
 export type Cocktail = {
     _id: string;
     directions: string;
@@ -62,7 +68,7 @@ export type Cocktail = {
     img: string;
     subtitle: string | null;
     name: string;
-    ingredients: Ingredient[];
+    ingredients: RecipeStep[];
 }
 
 export type Glassware = {
@@ -318,6 +324,25 @@ export async function getCategorizedIngredients(): Promise<{ingredients: Categor
         return {errorCode: resp.status, status: "Failure"};
     }
 }
+
+// Get Ingredients' Info (from IDs)
+export async function getIngredientsInfo(ingredientIDs: string[]): Promise<{ingredients: Ingredient[], status: "Success"} | Failure>{
+    const resp = await fetch(`${BACKEND_URL}/ingredients/some`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: "include",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ingredientIDs: ingredientIDs})
+    });
+
+    if(resp.ok) {
+        const resp_data: {ingredients: Ingredient[]} = await resp.json();
+        return {ingredients: resp_data.ingredients, status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
 
 // Like Cocktail
 export async function likeCocktail(cocktailID: string): Promise<StatusResponse> {

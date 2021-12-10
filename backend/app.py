@@ -351,6 +351,17 @@ def get_categorized_ingredients():
 
     return {'ingredients': categorized_ingr}, 200
 
+# Get Ingredients' Info (from IDs)
+@app.route('/ingredients/some', methods=['POST'])
+def get_ingredients_info():
+    ingredient_IDs = [ObjectId(ingredient_ID) for ingredient_ID in request.get_json()['ingredientIDs']]
+    ingredients_resp = list(ingr_db.find({'_id': {'$in': ingredient_IDs}}))
+
+    # Convert ObjectID --> String for JSON
+    for ingredient in ingredients_resp:
+        ingredient['_id'] = str(ingredient['_id'])
+    return {'ingredients': ingredients_resp}, 200
+
 # Like Cocktail
 @app.route('/user/<user_id>/cocktails/like', methods=['POST'])
 def like_cocktail(user_id):
