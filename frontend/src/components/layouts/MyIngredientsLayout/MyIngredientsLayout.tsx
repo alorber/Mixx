@@ -120,8 +120,7 @@ const MyIngredientsLayout = () => {
 
     // Check if received lists
     useEffect(() => {
-        if(ingredientsList !== null && userIngredientIDs !== null) {
-            setIsloading(true)
+        if(ingredientsList != null && userIngredientIDs != null) {
             markUserIngredients();
             restructureUserList();
             setIsloading(false);
@@ -153,7 +152,7 @@ const MyIngredientsLayout = () => {
             setRemovedIngredientIDs([...removedIngredientIDs, ingredientID]);
         }
 
-        if(userIngredientIDs !== null) {
+        if(userIngredientIDs != null) {
             setUserIngredientIDs(userIngredientIDs.filter((id: string) => id !== ingredientID));
         }
     }
@@ -165,6 +164,7 @@ const MyIngredientsLayout = () => {
         }
 
         setIsSaving(true);
+        setIsloading(true);
         const resp = await updateUserIngredients(addedIngredientIDs, removedIngredientIDs);
         if(resp.status === 'Success') {
             setAddedIngredientIDs([]);
@@ -176,10 +176,10 @@ const MyIngredientsLayout = () => {
         setIsSaving(false);
     }
 
-    return isLoading ? (
-        <Heading pt={10}>Loading Ingredients...</Heading>
-    ) : isSaving ? (
+    return isSaving ? (
         <Heading pt={10}>Saving Ingredients...</Heading>
+    ) : isLoading ? (
+        <Heading pt={10}>Loading Ingredients...</Heading>
     ) : ingredientsList !== null && categorizedUserIngredientsList !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
         <Stack h='100%' w='100%'>
             <Heading size='lg' mt={10} px={4}>Let us know what you have in your kitchen</Heading>

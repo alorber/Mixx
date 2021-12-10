@@ -210,7 +210,7 @@ def update_user_ingredients(user_id):
      # Check for success
     if modified_cnt > 0:
         ingredientIDs = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
-        return {'ingredients': [str(ingredientID) for ingredientID in ingredientIDs]}, 200
+        return {'ingredientIDs': [str(ingredientID) for ingredientID in ingredientIDs]}, 200
     else:
         # Database Error
         return {}, 500
