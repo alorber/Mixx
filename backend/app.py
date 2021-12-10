@@ -48,13 +48,18 @@ def get_check_password(user_id, password):
     hashed_password = user_db.find_one({"_id": ObjectId(user_id)}, {'password': 1})['password']
     return bcrypt.check_password_hash(hashed_password, password)
 
-# Converts cocktail DB response to JSON
+# Converts single cocktail response to JSON
+def cocktail_to_json(cocktail):
+    cocktail['_id'] = str(cocktail['_id'])
+    cocktail['glass'] = str(cocktail['glass'])
+    for ingredient in cocktail['ingredients']:
+        ingredient['ingredient'] = str(ingredient['ingredient'])
+    return cocktail
+
+# Converts cocktails list response to JSON
 def cocktails_to_json(cocktails):
     for cocktail in cocktails:
-        cocktail['_id'] = str(cocktail['_id'])
-        cocktail['glass'] = str(cocktail['glass'])
-        for ingredient in cocktail['ingredients']:
-            ingredient['ingredient'] = str(ingredient['ingredient'])
+        cocktail = cocktail_to_json(cocktail)
     return cocktails
 
 # ------ Routing ------
@@ -270,7 +275,8 @@ def get_all_cocktails():
 # Get Specific Cocktail's Info
 @app.route('/cocktails/<cocktail_id>', methods=['Get'])
 def get_cocktail_info(cocktail_id):
-    return cocktail_db.find_one({"_id": ObjectId(cocktail_id)}), 200
+    cocktail_info = cocktail_db.find_one({"_id": ObjectId(cocktail_id)})
+    return {'cocktail': cocktail_to_json(cocktail_info)}, 200
 
 # Get Cocktails Containing Ingredient
 @app.route('/cocktails/containing/<ingredient_id>', methods=['Get'])

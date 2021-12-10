@@ -256,7 +256,7 @@ export async function getAllCocktails(): Promise<{cocktails: Cocktail[], status:
 }
 
 // Get Cocktail's Info
-export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Failure> {
+export async function getCocktailInfo(cocktailID: string): Promise<{cocktail: Cocktail, status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/${cocktailID}`, {
         method: 'GET',
         credentials: "include"
@@ -264,14 +264,14 @@ export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Fa
 
     if(resp.ok) {
         const resp_data: {cocktail: Cocktail} = await resp.json();
-        return resp_data.cocktail
+        return {cocktail: resp_data.cocktail, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Get Cocktails Containing Ingredient
-export async function getCocktailContaining(ingredientID: string): Promise<{cocktails: [Cocktail]} | Failure> {
+export async function getCocktailContaining(ingredientID: string): Promise<{cocktails: [Cocktail], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/containing/${ingredientID}`, {
         method: 'GET',
         credentials: "include"
@@ -279,7 +279,7 @@ export async function getCocktailContaining(ingredientID: string): Promise<{cock
 
     if(resp.ok) {
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
-        return {cocktails: resp_data.cocktails}
+        return {cocktails: resp_data.cocktails, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
