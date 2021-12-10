@@ -226,7 +226,7 @@ export async function updateUserIngredients(newIngredients: string[], removedIng
 }
 
 // Get Possible Cocktails
-export async function getPossibleCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
+export async function getPossibleCocktails(): Promise<{cocktails: Cocktail[], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails`, {
         method: 'GET',
         credentials: "include"
@@ -234,14 +234,14 @@ export async function getPossibleCocktails(): Promise<{cocktails: [Cocktail]} | 
 
     if(resp.ok) {
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
-        return {cocktails: resp_data.cocktails}
+        return {cocktails: resp_data.cocktails, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Get All Cocktails
-export async function getAllCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
+export async function getAllCocktails(): Promise<{cocktails: Cocktail[]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails`, {
         method: 'GET',
         credentials: "include"
@@ -370,7 +370,7 @@ export async function removeDislikedCocktail(cocktailID: string): Promise<Status
 }
 
 // Get Liked Cocktails
-export async function getLikedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
+export async function getLikedCocktails(): Promise<{cocktails: Cocktail[]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/likes`, {
         method: 'GET',
         credentials: "include"
@@ -385,7 +385,7 @@ export async function getLikedCocktails(): Promise<{cocktails: [Cocktail]} | Fai
 }
 
 // Get Disliked Cocktails
-export async function getDislikedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
+export async function getDislikedCocktails(): Promise<{cocktails: Cocktail[]} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/dislikes`, {
         method: 'GET',
         credentials: "include"
@@ -434,15 +434,15 @@ export async function unfavoriteCocktail(cocktailID: string): Promise<StatusResp
 }
 
 // Get Favorited Cocktails
-export async function getFavoritedCocktails(): Promise<{cocktails: [Cocktail]} | Failure> {
+export async function getFavoritedCocktails(): Promise<{cocktailIDs: string[], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/favorites`, {
         method: 'GET',
         credentials: "include"
     });
 
     if(resp.ok) {
-        const resp_data: {cocktails: [Cocktail]} = await resp.json();
-        return {cocktails: resp_data.cocktails}
+        const resp_data: {cocktails: [string]} = await resp.json();
+        return {cocktailIDs: resp_data.cocktails, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }

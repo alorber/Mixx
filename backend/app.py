@@ -30,7 +30,12 @@ def create_user(email, password_hash, first_name, last_name):
         'email': email,
         'password': password_hash,
         'first_name': first_name,
-        'last_name': last_name
+        'last_name': last_name,
+        'ingredients': [],
+        'favorite_cocktails': [],
+        'shopping_list': [],
+        'liked_cocktails': [],
+        'disliked_cocktails': []
     }
 
 # Checks if user is authorized for action (Cookies match)
