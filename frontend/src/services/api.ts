@@ -65,6 +65,11 @@ export type Cocktail = {
     ingredients: Ingredient[];
 }
 
+export type Glassware = {
+    _id: string;
+    name: string;
+}
+
 // Functions
 // ----------
 
@@ -466,6 +471,36 @@ export async function getFavoritedCocktails(): Promise<{cocktailIDs: string[], s
         return {cocktailIDs: resp_data.cocktails, status: "Success"}
     } else {
         checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get All Glassware
+export async function getAllGlassware(): Promise<{glassware: Glassware[], status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/glassware`, {
+        method: 'GET',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {glassware: Glassware[], status: "Success"} = await resp.json();
+        return {glassware: resp_data.glassware, status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get Glassware Info
+export async function getGlasswareInfo(glasswareID: string): Promise<{glassware: Glassware, status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/glassware/${glasswareID}`, {
+        method: 'GET',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {glassware: Glassware, status: "Success"} = await resp.json();
+        return {glassware: resp_data.glassware, status: "Success"};
+    } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }

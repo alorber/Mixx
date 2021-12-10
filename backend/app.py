@@ -21,6 +21,7 @@ db = client.Mixx
 cocktail_db = db.Cocktails
 ingr_db = db.Ingredients
 user_db = db.Users
+glassware_db = db.Glassware
 
 # ------ Helper Functions ------
 
@@ -496,6 +497,27 @@ def get_favorited_cocktails(user_id):
     favorite_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'favorite_cocktails': 1})['favorite_cocktails']
 
     return {'cocktails': [str(cocktail) for cocktail in favorite_cocktails] or []}, 200
+
+# Get All Glassware
+@app.route('/glassware', methods=['Get'])
+def get_all_glassware():
+    glassware_list = list(glassware_db.find({}))
+
+    # Convert ObjectID -> String for JSON
+    for glassware in glassware_list:
+        glassware['_id'] = str(glassware['_id'])
+
+    return {'glassware': glassware_list}, 200
+
+# Get Glassware Info
+@app.route('/glassware/<glassware_id>', methods=['Get'])
+def get_glassware_info(glassware_id):
+    glassware = glassware_db.find_one({'_id': ObjectId(glassware_id)})
+
+    # Convert ObjectID -> String for JSON
+    glassware['_id'] = str(glassware['_id'])
+
+    return {'glassware': glassware}, 200
 
 if __name__ == "__main__":
     app.run(debug=True)
