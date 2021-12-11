@@ -15,7 +15,6 @@ const App = () => {
   const [loggedIn, updateLoggedIn] = useState(false);
 
   const checkLoggedIn = () => {
-    console.log(isLoggedIn());
     updateLoggedIn(isLoggedIn());
   }
 
@@ -41,7 +40,7 @@ const App = () => {
           <Route path='/my_favorites' element={showIfLoggedIn(<MyFavoritesLayout checkLoggedIn={checkLoggedIn} />)} />
           <Route path='/ingredients/:ingredient_id' element={<></>}/>
           <Route path='/ingredients' element={<></>}/>
-          <Route path='/cocktails/:cocktail_id' element={<CocktailLayout checkLoggedIn={checkLoggedIn} />}/>
+          <Route path='/cocktails/:cocktail_id' element={<CocktailLayout isLoggedIn={loggedIn} checkLoggedIn={checkLoggedIn} />}/>
           <Route path='/cocktails' element={<></>}/>
           <Route path='/search' element={<></>}/>
           <Route path='/settings' element={showIfLoggedIn(<></>)}/>

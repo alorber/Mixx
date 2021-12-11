@@ -410,7 +410,6 @@ def dislike_cocktail(user_id):
         return {}, 401
 
     update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$addToSet': {'disliked_cocktails': disliked_cocktail}})
-    
      # Check for success
     if update_resp.modified_count > 0:
         return {}, 200
@@ -418,7 +417,7 @@ def dislike_cocktail(user_id):
         # Database Error
         return {}, 500
 
-# Removed Liked Cocktail
+# Removed Disliked Cocktail
 @app.route('/user/<user_id>/cocktails/remove_dislike', methods=['POST'])
 def remove_disliked_cocktail(user_id):
     undisliked_cocktail = ObjectId(request.get_json()['cocktailID'])
@@ -446,7 +445,7 @@ def get_liked_cocktails(user_id):
 
     liked_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'liked_cocktails': 1})['liked_cocktails']
 
-    return {'cocktails': liked_cocktails}, 200
+    return {'cocktails': [str(liked_cocktail) for liked_cocktail in liked_cocktails]}, 200
 
 # Get Disliked Cocktails
 @app.route('/user/<user_id>/cocktails/dislikes', methods=['Get'])
@@ -458,7 +457,29 @@ def get_disliked_cocktails(user_id):
 
     disliked_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'disliked_cocktails': 1})['disliked_cocktails']
 
-    return {'cocktails': disliked_cocktails}, 200
+    return {'cocktails': [str(disliked_cocktail) for disliked_cocktail in disliked_cocktails]}, 200
+
+# Get liked / disliked status of one cocktail
+@app.route('/user/<user_id>/cocktails/like_status', methods=['POST'])
+def get_like_dislike_status(user_id):
+    cocktail_id = request.get_json()['cocktailID']
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    like_dislike_lists = user_db.find_one({'_id': ObjectId(user_id)}, {'disliked_cocktails': 1, 'liked_cocktails': 1})
+    liked_cocktails = [str(liked_cocktail) for liked_cocktail in like_dislike_lists['liked_cocktails']]
+    disliked_cocktails = [str(disliked_cocktail) for disliked_cocktail in like_dislike_lists['disliked_cocktails']]
+
+    liked_status = "None"
+    if cocktail_id in liked_cocktails:
+        liked_status = 'Liked'
+    elif cocktail_id in disliked_cocktails:
+        liked_status = 'Disliked'
+
+    return {'likeStatus': liked_status}, 200
 
 # Favorite Cocktail
 @app.route('/user/<user_id>/cocktails/favorite', methods=['POST'])

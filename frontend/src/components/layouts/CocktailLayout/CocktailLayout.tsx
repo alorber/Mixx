@@ -9,22 +9,24 @@ import {
     Image,
     Stack
     } from '@chakra-ui/react';
-import { Cocktail, getCocktailInfo, getGlasswareInfo, getIngredientsInfo, Glassware, Ingredient } from '../../../services/api';
+import { Cocktail, dislikeCocktail, getCocktailInfo, getGlasswareInfo, getIngredientsInfo, getLikeDislikeStatus, Glassware, Ingredient, likeCocktail, LikeDislikeStatus, removeDislikedCocktail, removeLikedCocktail } from '../../../services/api';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { FaThumbsDown, FaThumbsUp } from 'react-icons/fa';
 
 type CocktailLayoutProps = {
+    isLoggedIn: boolean,
     checkLoggedIn: () => void
 }
 
-const CocktailLayout = ({checkLoggedIn}: CocktailLayoutProps) => {
+const CocktailLayout = ({isLoggedIn, checkLoggedIn}: CocktailLayoutProps) => {
     // Get Cocktail ID from url
     const cocktailID = useParams().cocktail_id;
     const [isLoading, setIsLoading] = useState(false);
     const [cocktail, setCocktail] = useState<Cocktail | null>(null);
     const [glassware, setGlassware] = useState<Glassware | null>(null);
     const [ingredientsDict, setIngredientsDict] = useState<{[key: string]: Ingredient} | null>(null);
+    const [likedStatus, setLikedStatus] = useState<LikeDislikeStatus>("None");
     const [errorCode, setErrorCode] = useState<number | null>(null);
 
     const getCocktail = async (cocktailID: string) => {
@@ -63,6 +65,12 @@ const CocktailLayout = ({checkLoggedIn}: CocktailLayoutProps) => {
                 setIngredientsDict(ingredientsMap);
             }
 
+            // Get Like / Dislike Status
+            const likeStatusResp = await getLikeDislikeStatus(cocktailResp.cocktail._id);
+            
+            if(likeStatusResp.status == "Success") {
+                setLikedStatus(likeStatusResp.likeStatus);
+            }
         } else {
             setErrorCode(null);
         }
@@ -78,6 +86,82 @@ const CocktailLayout = ({checkLoggedIn}: CocktailLayoutProps) => {
         }
         checkLoggedIn();
     }, [])
+
+    // Like
+    const like = async (): Promise<boolean> => {
+        if(cocktail !== null) {
+            const resp = await likeCocktail(cocktail._id);
+            if(resp.status === "Success") {
+                return true;
+            }
+         }         
+         return false;
+    }
+
+    // Remove Like
+    const removeLike = async (): Promise<boolean> => {
+        if(cocktail !== null) {
+            const resp = await removeLikedCocktail(cocktail._id);
+            if(resp.status === "Success") {
+                return true;
+            }
+         }         
+         return false;
+    }
+
+    // Dislike
+    const dislike = async (): Promise<boolean> => {
+        if(cocktail !== null) {
+            const resp = await dislikeCocktail(cocktail._id);
+            if(resp.status === "Success") {
+                return true;
+            }
+         }         
+         return false;
+    }
+
+    // Remove Dislike
+    const removeDislike = async (): Promise<boolean> => {
+        if(cocktail !== null) {
+            const resp = await removeDislikedCocktail(cocktail._id);
+            if(resp.status === "Success") {
+                return true;
+            }
+         }         
+         return false;
+    }
+
+
+
+    const toggleLikeStatus = async (newStatus: LikeDislikeStatus) => {
+        checkLoggedIn();
+
+        let success: boolean = true;
+
+        // Check if need to remove from lists
+        if(likedStatus === "Disliked") {
+            // Remove from dislike list
+            success = success && await removeDislike();
+        }
+        if(likedStatus === "Liked") {
+            // Remove from like list
+            success = success && await removeLike();
+        }
+
+        // Check if need to add to lists
+        if(newStatus === "Liked") {
+            success = success && await like();
+        } else if(newStatus === "Disliked") {
+            success = success && await dislike();
+        }
+
+        // Toggle button
+        if(success) {
+           setLikedStatus(newStatus); 
+        } else {
+            checkLoggedIn();
+        }
+    }
 
     const isSubtitle = cocktail?.subtitle !== null  && cocktail?.subtitle !== '';
 
@@ -108,7 +192,7 @@ const CocktailLayout = ({checkLoggedIn}: CocktailLayoutProps) => {
                     )}
                 </GridItem>
             </Grid>
-            <Box backgroundColor='#EAF6FF' h='100%' style={{marginTop: 40}} px={10}>
+            <Box backgroundColor='#EAF6FF' h='100%' style={{marginTop: 40}} px={10} pb={20}>
                 {/* Directions */}
                 {cocktail.directions !== '' && (
                     <CocktailInfoItem title={'Directions'} text={cocktail.directions} />
@@ -131,15 +215,15 @@ const CocktailLayout = ({checkLoggedIn}: CocktailLayoutProps) => {
                     </Stack> 
                 </>)}
                 {/* Like / Dislike */}
-                <Heading size='lg' pt={8} pb={4}>Did you like this cocktail?</Heading>
-                <ButtonGroup spacing={{base: 10, md: 20}} w='100%' justifyContent='center'>
-                    <IconButton onClick={() => {}} _focus={{ outline: "none" }} borderRadius={20}
-                        icon={<FaThumbsUp size={50} color='#EAF6FF' />} aria-label="Thumbs Up" 
-                        boxSize={'100px'} backgroundColor='#2395FF'_hover={{backgroundColor: '#A8E28E'}} />
-                    <IconButton onClick={() => {}} _focus={{ outline: "none" }} borderRadius={20}
-                        icon={<FaThumbsDown size={50} color='#EAF6FF' />} aria-label="Thumbs Down" 
-                        boxSize={'100px'} backgroundColor='#2395FF'_hover={{backgroundColor: '#E5A5A6'}} />
-                </ButtonGroup>
+                {isLoggedIn && (<>
+                    <Heading size='lg' pt={8} pb={4}>Did you like this cocktail?</Heading>
+                    <ButtonGroup spacing={{base: 10, md: 20}} w='100%' justifyContent='center'>
+                        <LikeDislikeButton currentStatus={likedStatus} type={'Liked'} setStatus={toggleLikeStatus}
+                            hoverColor='#A8E28E' pressedColor='#97cb7f' />
+                        <LikeDislikeButton currentStatus={likedStatus} type={'Disliked'} setStatus={toggleLikeStatus}
+                        hoverColor='#E5A5A6' pressedColor='#ce9495' />
+                    </ButtonGroup>
+                </>)}
             </Box>
         </Stack>
     ) : (
@@ -159,11 +243,38 @@ type CocktailInfoItemProps = {
 }
 
 const CocktailInfoItem = ({title, text}: CocktailInfoItemProps) => {
-
     return (
         <Stack direction='row' w='100%' justifyContent='center' alignContent='center' pt={8}>
             <Heading size={'md'} textAlign='left'>{title}:</Heading>
             <Heading size={'sm'} textAlign='left'>{text}</Heading> 
         </Stack>
+    );
+}
+
+// Liked & Dislike Buttons
+type LikeDislikeButtonProps = {
+    currentStatus:  LikeDislikeStatus,
+    type: "Liked" | "Disliked",
+    setStatus: (newStatus: LikeDislikeStatus) => void,
+    hoverColor: string,
+    pressedColor: string
+}
+
+const LikeDislikeButton = ({currentStatus, type, setStatus, hoverColor, pressedColor}: LikeDislikeButtonProps) => {
+    const newStatus = type === currentStatus ? 'None' : type;
+    const ariaLabel = type === "Liked" ? "Thumbs Up" : "Thumbs Down"
+    return (
+        <IconButton onClick={() => {setStatus(newStatus)}} _focus={{ outline: "none"}} borderRadius={20}
+            icon={<LikeDislikeIcon type={type} size={50} color='#EAF6FF' />} aria-label={ariaLabel}
+            boxSize={'100px'} backgroundColor={currentStatus === type ? hoverColor : '#2395FF'} 
+            _hover={{backgroundColor: hoverColor}} _active={{backgroundColor: pressedColor}} />
+    );
+}
+
+const LikeDislikeIcon = ({type, size, color}: {type: "Liked" | "Disliked", size: number, color: string}) => {
+    return type === "Liked" ? (
+        <FaThumbsUp size={size} color={color} />
+    ) : (
+        <FaThumbsDown size={size} color={color} />
     );
 }

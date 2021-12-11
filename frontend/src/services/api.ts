@@ -76,6 +76,8 @@ export type Glassware = {
     name: string;
 }
 
+export type LikeDislikeStatus = "Liked" | "Disliked" | "None";
+
 // Functions
 // ----------
 
@@ -424,7 +426,7 @@ export async function getLikedCocktails(): Promise<{cocktails: Cocktail[]} | Fai
     });
 
     if(resp.ok) {
-        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        const resp_data: {cocktails: Cocktail[]} = await resp.json();
         return {cocktails: resp_data.cocktails}
     } else {
         checkUserAuth(resp.status);
@@ -440,12 +442,33 @@ export async function getDislikedCocktails(): Promise<{cocktails: Cocktail[]} | 
     });
 
     if(resp.ok) {
-        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        const resp_data: {cocktails: Cocktail[]} = await resp.json();
         return {cocktails: resp_data.cocktails}
     } else {
         checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
+}
+
+// Get liked / disliked status of one cocktail
+export async function getLikeDislikeStatus(cocktailID: string): 
+        Promise<{likeStatus: LikeDislikeStatus, status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/like_status`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: "include",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cocktailID: cocktailID})
+    });
+    
+    if(resp.ok) {
+        const resp_data: {likeStatus: LikeDislikeStatus} = await resp.json();
+        return {likeStatus: resp_data.likeStatus, status: "Success"}
+    } else {
+        checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+
 }
 
 // Favorite Cocktail
