@@ -1,6 +1,14 @@
 import IngredientsList from '../../ui/IngredientsList/IngredientsList';
 import React from 'react';
 import {
+    Box,
+    Button,
+    ButtonGroup,
+    Flex,
+    Heading,
+    Stack
+    } from '@chakra-ui/react';
+import {
     CATEGORIES_LIST,
     CategorizedIngredients,
     getCategorizedIngredients,
@@ -8,14 +16,6 @@ import {
     updateUserIngredients
     } from '../../../services/api';
 import { useEffect, useState } from 'react';
-import {
-    Box,
-    Button,
-    ButtonGroup,
-    Flex,
-    Heading,
-    Stack,
-    } from '@chakra-ui/react';
 
 type MyIngredientsLayoutProps = {
     checkLoggedIn: () => void,
@@ -23,7 +23,7 @@ type MyIngredientsLayoutProps = {
 
 
 const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
-    const [isLoading, setIsloading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false); 
     const [ingredientsList, setIngredientsList] = useState<CategorizedIngredients | null>(null);
     const [userIngredientIDs, setUserIngredientIDs] = useState<string[] | null>(null);
@@ -90,7 +90,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
 
     // Get List of Ingredients
     const getAllIngredients = async () => {
-        setIsloading(true);
+        setIsLoading(true);
         const resp = await getCategorizedIngredients()
         if(resp.status === "Success") {
             setIngredientsList(resp.ingredients);
@@ -119,7 +119,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
 
     // Load list on pageload
     useEffect(() => {
-        setIsloading(true);
+        setIsLoading(true);
         getAllIngredients();
         getUserIngredients();
     }, []);
@@ -129,7 +129,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         if(ingredientsList != null && userIngredientIDs != null) {
             markUserIngredients();
             restructureUserList();
-            setIsloading(false);
+            setIsLoading(false);
         }
     }, [ingredientsList, userIngredientIDs])
 
@@ -172,7 +172,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         }
 
         setIsSaving(true);
-        setIsloading(true);
+        setIsLoading(true);
         const resp = await updateUserIngredients(addedIngredientIDs, removedIngredientIDs);
         if(resp.status === 'Success') {
             setAddedIngredientIDs([]);

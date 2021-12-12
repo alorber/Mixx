@@ -1,3 +1,4 @@
+import AllIngredientsLayout from '../layouts/AllIngredientsLayout/AllIngredientsLayout';
 import CocktailLayout from '../layouts/CocktailLayout/CocktailLayout';
 import HomeLayout from '../layouts/HomeLayout/HomeLayout';
 import LoginSignupLayout from '../layouts/LoginSignupLayout/LoginSignupLayout';
@@ -39,7 +40,7 @@ const App = () => {
           <Route path='/my_cocktails' element={showIfLoggedIn(<MyCocktailsLayout checkLoggedIn={checkLoggedIn} />)}/>
           <Route path='/my_favorites' element={showIfLoggedIn(<MyFavoritesLayout checkLoggedIn={checkLoggedIn} />)} />
           <Route path='/ingredients/:ingredient_id' element={<></>}/>
-          <Route path='/ingredients' element={<></>}/>
+          <Route path='/ingredients' element={<AllIngredientsLayout />}/>
           <Route path='/cocktails/:cocktail_id' element={<CocktailLayout isLoggedIn={loggedIn} checkLoggedIn={checkLoggedIn} />}/>
           <Route path='/cocktails' element={<></>}/>
           <Route path='/search' element={<></>}/>

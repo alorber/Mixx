@@ -38,8 +38,9 @@ const CocktailsListItem = ({cocktailID, cocktailName, favoritesList, onFavoriteC
     return (
         <Stack direction='row'>
             <IconButton onClick={() => {onFavoriteClick(cocktailID)}} _focus={{ outline: "none" }}
-                icon={<FaHeart color={favoritesList.includes(cocktailID) ? '#E5A5A6' : '#FFFFFF'} />} aria-label={'Favorite Toggle'} backgroundColor={'#eaf6ff'}
-            _hover={{ backgroundColor: '#b7e0ff' }} />
+                icon={<FaHeart color={favoritesList.includes(cocktailID) ? '#E5A5A6' : '#FFFFFF'} />} 
+                aria-label={'Favorite Toggle'} backgroundColor={'#eaf6ff'}
+                _hover={{ backgroundColor: '#b7e0ff' }} />
             <Link as={RouterLink} to={`/cocktails/${cocktailID}`} _focus={{outline: "none"}}
                     role={'group'} display={'block'} p={2} rounded={'md'} w={'100%'}
                     _hover={{textDecoration: "none", bg: "#eaf6ff"}}>

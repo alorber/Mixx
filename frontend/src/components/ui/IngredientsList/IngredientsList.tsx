@@ -15,11 +15,11 @@ import {
 
 type IngredientsListProps = {
     ingredientsList: CategorizedIngredients,
-    addIngredient: (ingredientID: string) => void,
-    removeIngredient: (ingredientID: string) => void,
+    addIngredient?: (ingredientID: string) => void,
+    removeIngredient?: (ingredientID: string) => void,
 }
 
-const IngredientsList = ({ingredientsList, addIngredient, removeIngredient}: IngredientsListProps) => {
+const IngredientsList = ({ingredientsList, addIngredient = ()=>{}, removeIngredient= ()=>{}}: IngredientsListProps) => {
     return (
         <Stack p={8} maxW={700} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
                 overflowY={'auto'} ml='auto' mr='auto'>
@@ -39,7 +39,7 @@ const IngredientsList = ({ingredientsList, addIngredient, removeIngredient}: Ing
 
 // Category List Item
 type CategoryListItemProps = {
-    categoryIngredientsList: {[key: string]: [{name: string, id: string, owned?: boolean}]},
+    categoryIngredientsList: {[key: string]: {name: string, id: string, owned?: boolean}[]},
     category: string,
     subcategory?: string | null,
     addIngredient: (ingredientID: string) => void,
@@ -89,8 +89,9 @@ const IngredientsListItem = (
     return (
         <Stack spacing={4} w='100%'>
             <Link _focus={{outline: "none"}} role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
-                    _hover={{textDecoration: "none", bg: ingredient.owned ? '#E5A5A6' : '#A8E28E'}} onClick={(e) => {e.preventDefault(); 
-                    onClick(ingredient.id)}}>
+                    _hover={{textDecoration: "none", 
+                    bg: ingredient.hasOwnProperty('owned') ? (ingredient.owned ?  '#E5A5A6' : '#A8E28E') : '#eaf6ff'}} 
+                    onClick={(e) => {e.preventDefault(); onClick(ingredient.id)}}>
                 <StyledListItem hoverIconType={
                     ingredient.hasOwnProperty('owned') ? (ingredient.owned ? MinusIcon : AddIcon) : undefined}>
                     {ingredient.name}
