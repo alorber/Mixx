@@ -195,6 +195,40 @@ def update_password(user_id):
         # Database Error
         return {}, 500
 
+# Get Name
+@app.route('/user/<user_id>/name', methods=['GET'])
+def get_name(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    resp = user_db.find_one({'_id': ObjectId(user_id)}, {'first_name': 1, 'last_name': 1})
+
+    if resp != None:
+        return {'firstName': resp['first_name'], 'lastName': resp['last_name']}, 200
+    return {}, 500
+
+# Update Name
+@app.route('/user/<user_id>/updateName', methods=['POST'])
+def update_name(user_id):
+    update_info = request.get_json()
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, 
+        {'$set': {'first_name': update_info['firstName'], 'last_name': update_info['lastName']}})
+    
+    # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
+
 # Get Current User's Ingredients
 @app.route('/user/<user_id>/ingredients', methods=['Get'])
 def get_user_ingredients(user_id):

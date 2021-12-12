@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Heading, Stack } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import { FormErrorMessage, FormPasswordInput, FormSubmitButton, FormSuccessMessage, FormTextInput } from '../../ui/StyledFormFields/StyledFormFields';
-import { deleteAccount, logout, updateEmail, updatePassword } from '../../../services/api';
+import { deleteAccount, getName, logout, updateEmail, updateName, updatePassword } from '../../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 type SettingsLayoutProps = {
@@ -68,16 +68,42 @@ const updateForm = (formValues: {[key: string]: string}, newValue: string, field
 
 // Update Name
 const UpdateNameForm = () => {
-    const [formValues, setFormValues] = useState<{[key: string]: string}>({firstName: '', lastName: '', password: ''});
+    const [formValues, setFormValues] = useState<{[key: string]: string}>({firstName: '', lastName: ''});
     const [isLoading, setIsLoading] = useState(false);
+    const [oldName, setOldName] = useState<{[key: string]: string}>({firstName: '', lastName: ''});
     const [errorCode, setErrorCode] = useState<number | null>(null);
+    const [wasSuccess, setWasSuccess] = useState(false);
 
-    const onSubmit = () => {
-
+    const getOldName = async () => {
+        const resp = await getName();
+        if(resp.status === "Success") {
+            setOldName({firstName: resp.firstName, lastName: resp.lastName});
+            setFormValues({firstName: resp.firstName, lastName: resp.lastName})
+        }
     }
 
+    useEffect(() => {
+        getOldName();
+    }, []);
+
+    const onSubmit = async () => {
+        const resp = await updateName(formValues.firstName, formValues.lastName);
+        if(resp.status === "Success") {
+            setErrorCode(null);
+            setWasSuccess(true);
+            setOldName(JSON.parse(JSON.stringify(formValues)))
+        } else {
+            setErrorCode(resp.errorCode);
+            setWasSuccess(false);
+            setFormValues(JSON.parse(JSON.stringify(oldName)));
+        }
+    }
+
+    const successMessage = "Name was successfully changed";
+
     return (
-        <SettingsLayoutForm title="Update Name" onSubmit={onSubmit} errorCode={errorCode}>
+        <SettingsLayoutForm title="Update Name" onSubmit={onSubmit} errorCode={errorCode}
+                successMessage={wasSuccess ? successMessage : null} >
             {/* First Name Field */}
             <FormTextInput value={formValues.firstName} onChange={(v: string) => {setFormValues(updateForm(formValues, v, 'firstName'))}}
                 label={"First Name"} type="name" placeholder='Laura' ariaLabel='First Name' />
@@ -162,6 +188,7 @@ const UpdatePasswordForm = () => {
                 } else {
                     setErrorCode(null);
                     setWasSuccess(true);
+                    setFormValues({oldPassword: '', newPassword1: '', newPassword2: ''});
                 }
             } else {
                 setErrorCode(resp.errorCode);

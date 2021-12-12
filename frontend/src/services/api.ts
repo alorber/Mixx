@@ -214,6 +214,41 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
     }
 }
 
+// Get Name
+export async function getName(): Promise<{firstName: string, lastName: string, status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/name`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {firstName: string, lastName: string} = await resp.json();
+        return {firstName: resp_data.firstName, lastName: resp_data.lastName, status: "Success"}
+    } else {
+        checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Update Name
+export async function updateName(firstName: string, lastName: string): Promise<StatusResponse> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/updateName`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: "include",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({firstName: firstName, lastName: lastName})
+    });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
 // Get Current User Ingredients
 export async function getCurrentUserIngredients(): Promise<{ingredientIDs: string[], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients`, {
