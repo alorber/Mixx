@@ -311,6 +311,22 @@ export async function getCocktailContaining(ingredientID: string): Promise<{cock
     }
 }
 
+// Get All Ingredients
+export async function getAllIngredients(): Promise<{ingredients: Ingredient[], status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/ingredients`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {ingredients: Ingredient[]} = await resp.json();
+        return {ingredients: resp_data.ingredients, status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
 // Get Categorized Ingredients
 export async function getCategorizedIngredients(): Promise<{ingredients: CategorizedIngredients, status: 'Success'} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/ingredients/categorized`, {

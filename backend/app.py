@@ -301,6 +301,17 @@ def get_cocktail_containing(ingredient_id):
         }
     ]))}, 200
 
+# Get All Ingredients
+@app.route('/ingredients', methods=['GET'])
+def get_all_ingredients():
+    ingr_query_resp = list(ingr_db.find({}))
+
+    # Convert ObjectID -> String for JSON
+    for ingredient in ingr_query_resp:
+        ingredient['_id'] = str(ingredient['_id'])
+
+    return {'ingredients': ingr_query_resp}, 200
+
 # Get Categorized Ingredients
 @app.route('/ingredients/categorized', methods=['Get'])
 def get_categorized_ingredients():
