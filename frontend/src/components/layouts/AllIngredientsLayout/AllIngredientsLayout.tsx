@@ -3,7 +3,7 @@ import React from 'react';
 import SearchBar from '../../ui/SearchBar/SearchBar';
 import { Box, Heading, Stack } from '@chakra-ui/react';
 import { CategorizedIngredients } from '../../../services/api';
-import { getIngredientsCategorized } from '../../../Functions/ingredients';
+import { buildIngredientsSearchResults, getIngredientsCategorized } from '../../../Functions/ingredients';
 import { useEffect, useState } from 'react';
         
 type AllIngredientsLayoutProps = {
@@ -29,45 +29,11 @@ const AllIngredientsLayout = ({}: AllIngredientsLayoutProps) => {
 
     // Build Search Results
     const loadSearchResults = () => {
-        if(ingredientsList === null) {
-            return
+        const results = buildIngredientsSearchResults(ingredientsList, searchString)
+
+        if(results !== null) {
+            setSearchResults(results);  
         }
-
-        const searchTerm = searchString.trim().toLowerCase();
-        const results: CategorizedIngredients = JSON.parse(JSON.stringify(ingredientsList));
-
-        // If no search, show all
-        if(searchTerm === '') {
-            setSearchResults(results);
-        }
-
-        for(const category in results) {
-            for(const subcategory in results[category]) {
-                // List of passing ingredients in subcategory
-                const passingIngredients = [];
-
-                // Add passing ingredients
-                for(const ingredient of results[category][subcategory]) {
-                    if(ingredient.name.toLowerCase().includes(searchTerm)) {
-                        passingIngredients.push(ingredient);
-                    }
-                }
-
-                // Remove empty subcategories
-                if(passingIngredients.length === 0) {
-                    delete results[category][subcategory];
-                } else {
-                    results[category][subcategory] = passingIngredients;
-                }
-            }
-
-            // Removes empty categories
-            if(Object.keys(results[category]).length === 0) {
-                delete results[category];
-            }
-        }
-
-        setSearchResults(results);
     }
 
     // Load list on pageload

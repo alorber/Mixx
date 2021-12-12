@@ -1,5 +1,15 @@
 import IngredientsList from '../../ui/IngredientsList/IngredientsList';
 import React from 'react';
+import SearchBar from '../../ui/SearchBar/SearchBar';
+import {
+    addIngredient,
+    buildIngredientsSearchResults,
+    getIngredientsCategorized,
+    getUserIngredients,
+    removeIngredient,
+    restructureUserList,
+    saveIngredients
+    } from '../../../Functions/ingredients';
 import {
     Box,
     Button,
@@ -8,13 +18,7 @@ import {
     Heading,
     Stack
     } from '@chakra-ui/react';
-import {
-    CATEGORIES_LIST,
-    CategorizedIngredients,
-    getCategorizedIngredients,
-    getCurrentUserIngredients,
-    updateUserIngredients
-    } from '../../../services/api';
+import { CategorizedIngredients } from '../../../services/api';
 import { useEffect, useState } from 'react';
 
 type MyIngredientsLayoutProps = {
@@ -33,6 +37,9 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
     const [allIngredientsErrorCode, setAllIngredientsErrorCode] = useState<number | null>(null);
     const [userIngredientsErrorCode, setUserIngredientsErrorCode] = useState<number | null>(null);
     const [selectedList, setSelectedList] = useState<'All' | 'Owned'>('All');
+    const [searchString, setSearchString] = useState<string>('');
+    const [allIngredientsSearchResults, setAllIngredientsSearchResults] = useState<CategorizedIngredients | null>(null);
+    const [userIngredientsSearchResults, setUserIngredientsSearchResults] = useState<CategorizedIngredients | null>(null);
 
     // Marks user ingredients in master list
     const markUserIngredients = () => {
@@ -49,172 +56,117 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         }
     }
 
-    // Restructures user ingredients to be compatible with list component
-    const restructureUserList = () => {
-        if(userIngredientIDs == null) {
-            return;
-        }
-        if(userIngredientIDs.length === 0) {
-            setCategorizedUserIngredientsList({});
+    // Build Search Results
+    const loadSearchResults = (userIngredients?: CategorizedIngredients | null) => {
+        if(userIngredients === null || userIngredients === undefined) {
+            userIngredients = categorizedUserIngredientsList;
         }
 
-        // Adds categories in order
-        const userIngredientsList = CATEGORIES_LIST.reduce(
-            (ingredients:CategorizedIngredients, category:string) => {ingredients[category] = {}; return ingredients;}, {}
-        );
-        
-        // Adds owned ingredients
-        for(const category in ingredientsList) {
-            for(const subcategory in ingredientsList[category]) {
-                for(const ingredient of ingredientsList[category][subcategory]) {
-                    if(ingredient.owned) {
-                        if(!userIngredientsList[category].hasOwnProperty(subcategory)) {
-                            userIngredientsList[category][subcategory] = [ingredient];
-                        } else {
-                            userIngredientsList[category][subcategory].push(ingredient);
-                        }
-                    }
-                }
-            }
+        // All Ingredients Search Results
+        const allResults = buildIngredientsSearchResults(ingredientsList, searchString)
+
+        if(allResults !== null) {
+            setAllIngredientsSearchResults(allResults);  
         }
 
-        // Removes empty categories
-        for(const category in userIngredientsList) {
-            if(Object.keys(userIngredientsList[category]).length === 0) {
-                delete userIngredientsList[category];
-            }
-        }
+        // User Ingredients Search Results
+        const userResults = buildIngredientsSearchResults(userIngredients, searchString)
 
-        setCategorizedUserIngredientsList(userIngredientsList);
-    }
-
-    // Get List of Ingredients
-    const getAllIngredients = async () => {
-        setIsLoading(true);
-        const resp = await getCategorizedIngredients()
-        if(resp.status === "Success") {
-            setIngredientsList(resp.ingredients);
-            setAllIngredientsErrorCode(null);
-        }
-        // Error
-        else {
-            setAllIngredientsErrorCode(resp.errorCode);
+        if(userResults !== null) {
+            setUserIngredientsSearchResults(userResults);  
         }
     }
 
-    // Get User's Ingredients
-    const getUserIngredients = async () => {
+    const loadIngredientsLists = async () => {
         checkLoggedIn();
-        const resp = await getCurrentUserIngredients()
-        if(resp.status === "Success") {
-            setUserIngredientIDs(resp.ingredientIDs);
-            setUserIngredientsErrorCode(null);
-        }
-        // Error
-        else {
-            setUserIngredientsErrorCode(resp.errorCode);
-            checkLoggedIn();
-        }
+        getIngredientsCategorized(setAllIngredientsErrorCode, 
+            (ingredients: CategorizedIngredients) => {
+                setIngredientsList(ingredients);
+                setAllIngredientsSearchResults(ingredients);
+            });
+        getUserIngredients(setUserIngredientsErrorCode, 
+            (ingredients: string[]) => {setUserIngredientIDs(ingredients)},
+            checkLoggedIn);
     }
 
     // Load list on pageload
     useEffect(() => {
         setIsLoading(true);
-        getAllIngredients();
-        getUserIngredients();
+        loadIngredientsLists();
     }, []);
 
     // Check if received lists
     useEffect(() => {
         if(ingredientsList != null && userIngredientIDs != null) {
             markUserIngredients();
-            restructureUserList();
+            const restructuredUserList = restructureUserList(userIngredientIDs, ingredientsList);
+            setCategorizedUserIngredientsList(restructuredUserList);
+            if(userIngredientsSearchResults === null) {
+               setUserIngredientsSearchResults(restructuredUserList); 
+            } else {
+              loadSearchResults(restructuredUserList);  
+            }
             setIsLoading(false);
         }
     }, [ingredientsList, userIngredientIDs])
 
-    // Add ingredient to user's list
-    const addIngredient = (ingredientID: string) => {
-        // Check if in removed list
-        if(removedIngredientIDs.includes(ingredientID)) {
-            setRemovedIngredientIDs(removedIngredientIDs.filter(id => id !== ingredientID));
-        } else {
-            // Add to added list
-            setAddedIngredientIDs([...addedIngredientIDs, ingredientID]);
-        }
+    useEffect(() => {
+        loadSearchResults();
+    }, [searchString]);
 
-        if(userIngredientIDs != null) {
-            setUserIngredientIDs([...userIngredientIDs, ingredientID]);
-        }
+    // Add ingredient to user's list
+    const addUserIngredient = (ingredientID: string) => {
+        addIngredient(ingredientID, removedIngredientIDs, setRemovedIngredientIDs, 
+            addedIngredientIDs, setAddedIngredientIDs, userIngredientIDs, 
+            setUserIngredientIDs);
     }
 
     // Remove ingredient from user's list
-    const removeIngredient = (ingredientID: string) => {
-        // Check if in added list
-        if(addedIngredientIDs.includes(ingredientID)) {
-            setAddedIngredientIDs(addedIngredientIDs.filter(id => id !== ingredientID));
-        } else {
-            // Add to removed list
-            setRemovedIngredientIDs([...removedIngredientIDs, ingredientID]);
-        }
-
-        if(userIngredientIDs != null) {
-            setUserIngredientIDs(userIngredientIDs.filter((id: string) => id !== ingredientID));
-        }
+    const removeUserIngredient = (ingredientID: string) => {
+        removeIngredient(ingredientID, removedIngredientIDs, setRemovedIngredientIDs, 
+            addedIngredientIDs, setAddedIngredientIDs, userIngredientIDs, 
+            setUserIngredientIDs);
     }
 
     // Save ingredient list changes
-    const saveIngredients = async () => {
-        checkLoggedIn();
-
-        if(addedIngredientIDs.length === 0 && removedIngredientIDs.length === 0) {
-            return;
-        }
-
-        setIsSaving(true);
-        setIsLoading(true);
-        const resp = await updateUserIngredients(addedIngredientIDs, removedIngredientIDs);
-        if(resp.status === 'Success') {
-            setAddedIngredientIDs([]);
-            setRemovedIngredientIDs([]);
-            setUserIngredientIDs(resp.ingredientIDs);
-        } else {
-            setUserIngredientsErrorCode(resp.errorCode);
-            checkLoggedIn();
-        }
-        setIsSaving(false);
+    const saveUserIngredients = async () => {
+        await saveIngredients(checkLoggedIn, removedIngredientIDs, setRemovedIngredientIDs, 
+            addedIngredientIDs, setAddedIngredientIDs, setUserIngredientIDs, 
+            setIsSaving, setIsLoading, setUserIngredientsErrorCode);
     }
 
     return isSaving ? (
         <Heading pt={10}>Saving Ingredients...</Heading>
     ) : isLoading ? (
         <Heading pt={10}>Loading Ingredients...</Heading>
-    ) : ingredientsList !== null && categorizedUserIngredientsList !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
-        <Stack h='100%' w='100%'>
+    ) : allIngredientsSearchResults !== null && userIngredientsSearchResults !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
+        <Stack h='100%' w='100%'  px={10}>
             <Heading size='lg' mt={10} px={4}>Let us know what you have in your kitchen</Heading>
-            <Flex w='100%' justifyContent='center' pt={6}>
-                <Button type='submit' w='60%' maxW={1000} onClick={saveIngredients} boxShadow='sm' 
+            <Flex w='100%' justifyContent='center' pt={6} pb={6}>
+                <Button type='submit' w='100%' maxW={700} onClick={saveUserIngredients} boxShadow='sm' 
                         backgroundColor={"#b7e0ff"} _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} 
                         _focus={{outline: "none"}}>
                     Save Ingredients
                 </Button>
             </Flex>
+            <SearchBar setSearch={setSearchString} placeholderText="Search For Ingredients" />
             <Stack direction={'row'} h='85%' w='100%' maxW={1500} spacing={4} px={10} 
-                    display={['none', 'none', 'flex', 'flex']} style={{marginLeft: 'auto', marginRight: 'auto'}}>
+                    display={['none', 'none', 'flex', 'flex']} 
+                    style={{marginLeft: 'auto', marginRight: 'auto', marginTop: -10}}>
                 <Stack w='100%' h='100%' mt={12}>
                     <Heading size='md'>All Ingredients</Heading>
                     <Box w='100%' h='100%'>
-                        <IngredientsList ingredientsList={ingredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                        <IngredientsList ingredientsList={allIngredientsSearchResults} addIngredient={addUserIngredient} removeIngredient={removeUserIngredient}/>
                     </Box> 
                 </Stack>
                 <Stack w='100%' h='100%' style={{marginTop: '3em'}}>
                     <Heading size='md'>My Ingredients</Heading>
                     <Box w='100%' h='100%'>
-                        <IngredientsList ingredientsList={categorizedUserIngredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                        <IngredientsList ingredientsList={userIngredientsSearchResults} addIngredient={addUserIngredient} removeIngredient={removeUserIngredient}/>
                     </Box>
                 </Stack>
             </Stack>
-            <Stack h='85%' w={'100%'} spacing={4} px={10} display={['flex', 'flex', 'none', 'none']} pt={8}>
+            <Stack h='85%' w={'100%'} spacing={4} display={['flex', 'flex', 'none', 'none']} pt={6}>
                 <ButtonGroup isAttached w='100%'>
                     <Button w='50%' onClick={(e) => {e.preventDefault(); setSelectedList('All')}}
                     boxShadow='sm' backgroundColor={selectedList === 'All' ? '#2395FF' : '#EAF6FF'} _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} 
@@ -229,11 +181,11 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
                 </ButtonGroup>
                 {selectedList === 'All' ? (
                     <Box w='100%' h='100%'>
-                        <IngredientsList ingredientsList={ingredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                        <IngredientsList ingredientsList={allIngredientsSearchResults} addIngredient={addUserIngredient} removeIngredient={removeUserIngredient}/>
                     </Box>
                 ) : (
                     <Box w='100%' h='100%'>
-                        <IngredientsList ingredientsList={categorizedUserIngredientsList} addIngredient={addIngredient} removeIngredient={removeIngredient}/>
+                        <IngredientsList ingredientsList={userIngredientsSearchResults} addIngredient={addUserIngredient} removeIngredient={removeUserIngredient}/>
                     </Box>
                 )}
             </Stack>
