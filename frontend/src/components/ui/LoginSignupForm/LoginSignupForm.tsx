@@ -14,6 +14,7 @@ import {
     Link,
     Stack
     } from '@chakra-ui/react';
+import { FormPasswordInput, FormSubmitButton, FormTextInput } from '../../ui/StyledFormFields/StyledFormFields';
 import { login, signup } from '../../../services/api';
 import { useState } from 'react';
 
@@ -73,56 +74,22 @@ const LoginSignupForm = ({updateLoggedIn}: {updateLoggedIn: (l: boolean) => void
                                 {errorCode !== null && <FormErrorMessage errorCode={errorCode} /> }
                                 {formType === 'Signup' && <>
                                     {/* First Name Field */}
-                                    <FormControl isRequired>
-                                        <FormLabel>First Name</FormLabel>
-                                        <Input type="name" placeholder="Laura" value={formValues.firstName}
-                                            aria-label="Email"  borderColor="#b7e0ff" _hover={{borderColor: "#2395FF"}}
-                                            onChange={e => updateForm('firstName', e.currentTarget.value)}
-                                            focusBorderColor="#2395ff"/>
-                                    </FormControl>
+                                    <FormTextInput value={formValues.firstName} onChange={(v: string) => {updateForm('firstName', v)}}
+                                        label={"First Name"} type="name" placeholder='Laura' ariaLabel='First Name' />
                                     {/* Last Name Field */}
-                                    <FormControl isRequired>
-                                        <FormLabel>Last Name</FormLabel>
-                                        <Input type="name" placeholder="Sparks" value={formValues.lastName}
-                                            aria-label="Email"  borderColor="#b7e0ff" _hover={{borderColor: "#2395FF"}}
-                                            onChange={e => updateForm('lastName', e.currentTarget.value)}
-                                            focusBorderColor="#2395ff"/>
-                                    </FormControl>
+                                    <FormTextInput value={formValues.lastName} onChange={(v: string) => {updateForm('lastName', v)}}
+                                        label={"Last Name"} type="name" placeholder='Sparks' ariaLabel='Last Name' />
                                 </>}
                                 {/* Email Field */}
-                                <FormControl isRequired>
-                                    <FormLabel>Email Address</FormLabel>
-                                    <Input type="email" placeholder="LauraSparks@mixx.com" value={formValues.email}
-                                        aria-label="Email"  borderColor="#b7e0ff" _hover={{borderColor: "#2395FF"}}
-                                        onChange={e => updateForm('email', e.currentTarget.value)}
-                                        focusBorderColor="#2395ff"/>
-                                </FormControl>
+                                <FormTextInput value={formValues.email} onChange={(v: string) => {updateForm('email', v)}}
+                                    label="Email Address" type='email' placeholder='LauraSparks@mixx.com'
+                                    ariaLabel='Email' />
                                 {/* Password Field */}
-                                <FormControl isRequired>
-                                    <FormLabel>Password</FormLabel>
-                                    <InputGroup>
-                                        <Input type={showPassword ? "text" : "password"}
-                                            placeholder="*******" value={formValues.password}
-                                            aria-label="Password" borderColor="#b7e0ff" _hover={{borderColor: "#2395FF"}}
-                                            onChange={e => updateForm('password', e.currentTarget.value)}/>
-                                        <InputRightElement width="4.5rem">
-                                            <Button h="1.75rem" size="sm" onClick={togglePasswordVisibility}
-                                                    _hover={{boxShadow: 'md', backgroundColor: "#FFFFFF",
-                                                    color: "#2395FF", border: "1px solid #2395FF"}}
-                                                    backgroundColor={"#b7e0ff"} focusBorderColor="#b7e0ff"
-                                                    _focus={{outline: "none"}}>
-                                                {showPassword ? "Hide" : "Show"}
-                                            </Button>
-                                        </InputRightElement>
-                                    </InputGroup>
-                                </FormControl>
+                                <FormPasswordInput value={formValues.password} 
+                                    onChange={(v: string) => {updateForm('password', v)}} 
+                                    showPassword={showPassword} togglePasswordVisibility={togglePasswordVisibility} />
                                 {/* Submit Button */}
-                                <Button width="full"
-                                        type="submit" boxShadow='sm' backgroundColor={"#b7e0ff"}
-                                        _hover={{boxShadow: 'md'}} _active={{boxShadow: 'lg'}} 
-                                        _focus={{outline: "none"}} isLoading={isLoading}>
-                                    {formType === "Signup" ? "Create Account" : "Login"}
-                                </Button>
+                                <FormSubmitButton isLoading={isLoading} label={formType === "Signup" ? "Create Account" : "Login"} />
                                 {/* Switch Form Type (Between login & signup) */}
                                 <FormSwitchText formType={formType} setFormType={setFormType} setErrorCode={setErrorCode}/>
                             </Stack>

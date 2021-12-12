@@ -7,6 +7,7 @@ import MyCocktailsLayout from '../layouts/MyCocktailsLayout/MyCocktailsLayout';
 import MyFavoritesLayout from '../layouts/MyFavoritesLayout/MyFavoritesLayout';
 import MyIngredientsLayout from '../layouts/MyIngredientsLayout/MyIngredientsLayout';
 import Navbar from '../sections/Navbar/Navbar';
+import SettingsLayout from '../layouts/SettingsLayout/SettingsLayout';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { isLoggedIn } from '../../services/api';
 import { Stack } from '@chakra-ui/layout';
@@ -43,7 +44,7 @@ const App = () => {
           <Route path='/ingredients' element={<AllIngredientsLayout />}/>
           <Route path='/cocktails/:cocktail_id' element={<CocktailLayout isLoggedIn={loggedIn} checkLoggedIn={checkLoggedIn} />}/>
           <Route path='/cocktails' element={<AllCocktailsLayout isLoggedIn={loggedIn} checkLoggedIn={checkLoggedIn} />}/>
-          <Route path='/settings' element={showIfLoggedIn(<></>)}/>
+          <Route path='/settings' element={showIfLoggedIn(<SettingsLayout />)}/>
         </Routes>
       </Stack>
    </BrowserRouter>
