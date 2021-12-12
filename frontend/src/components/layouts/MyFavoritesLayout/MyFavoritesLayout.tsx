@@ -1,7 +1,13 @@
 import CocktailsList from '../../ui/CocktailsList/CocktailsList';
 import React, { useEffect, useState } from 'react';
 import { Box, Heading, Stack } from '@chakra-ui/react';
-import { Cocktail, favoriteCocktail, getAllCocktails, getFavoritedCocktails, getPossibleCocktails, unfavoriteCocktail } from '../../../services/api';
+import { Cocktail, getAllCocktails } from '../../../services/api';
+import {
+    getSavedCocktails,
+    setFavorite,
+    setUnfavorite,
+    sortCocktailsOnFavorites
+    } from '../../../Functions/cocktails';
 
 type MyFavoritesLayoutProps = {
     checkLoggedIn: () => void,
@@ -23,37 +29,16 @@ const MyFavoritesLayout = ({checkLoggedIn}: MyFavoritesLayoutProps) => {
             return null;
         }
     }
-
-    const getSavedCocktails = async () => {
-        checkLoggedIn();
-        const resp = await getFavoritedCocktails();
-        if(resp.status == "Success") {
-            setFavoriteCocktailsList(resp.cocktailIDs);
-            setErrorCode(null);
-            return resp.cocktailIDs;
-        } else {
-            setErrorCode(resp.errorCode);
-            checkLoggedIn();
-            return null;
-        }
-    }
-
-    const sortCocktails = (cocktails: Cocktail[] | null, favorites: string[] | null) => {
-        if(cocktails == null || favorites == null) {
-            return;
-        }
-
-        const sortedCocktail = [...cocktails].filter(c => favorites.includes(c._id))
-        .sort((c1, c2) => {
-            return c1.name.toLowerCase() < c2.name.toLowerCase() ? -1 : 1;
-        });
-        setCocktailsList(sortedCocktail);
-    }
-
+    
     const getSortedCocktails = async() => {
-        const favorites = await getSavedCocktails();
-        const cocktails = await getCocktails();
-        sortCocktails(cocktails, favorites);
+        const favorites = await getSavedCocktails(checkLoggedIn, setFavoriteCocktailsList, setErrorCode);
+        let cocktails = await getCocktails();
+        
+        if(favorites !== null && cocktails !== null) {
+            cocktails = cocktails.filter(c => favorites.includes(c._id));
+        }
+
+        setCocktailsList(sortCocktailsOnFavorites(cocktails, favorites));
         setIsLoading(false);
     }
 
@@ -62,36 +47,13 @@ const MyFavoritesLayout = ({checkLoggedIn}: MyFavoritesLayoutProps) => {
         getSortedCocktails();
     }, [])
 
-    const setFavorite = async (cocktailID: string) => {
-        const resp = await favoriteCocktail(cocktailID);
-        
-        if(resp.status == "Success") {
-            setFavoriteCocktailsList([...favoriteCocktailsList, cocktailID]);
-            sortCocktails(cocktailsList, [...favoriteCocktailsList, cocktailID]);
-        } else {
-            setErrorCode(resp.errorCode);
-            checkLoggedIn();
-        }
-    }
-
-    const setUnfavorite = async (cocktailID: string) => {
-        const resp = await unfavoriteCocktail(cocktailID);
-        
-        if(resp.status == "Success") {
-            setFavoriteCocktailsList(favoriteCocktailsList.filter(id => id !== cocktailID));
-            sortCocktails(cocktailsList, favoriteCocktailsList.filter(id => id !== cocktailID));
-        } else {
-            setErrorCode(resp.errorCode);
-            checkLoggedIn();
-        }
-    }
-
-    const toggleFavorite = (cocktailID: string) => {
+    const unfavorite = async (cocktailID: string) => {
         checkLoggedIn();
-        if(favoriteCocktailsList.includes(cocktailID)) {
-            setUnfavorite(cocktailID);
-        } else {
-            setFavorite(cocktailID);
+        const success = await setUnfavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList, 
+            setErrorCode, cocktailID);
+        if(success && cocktailsList !== null) {
+            setCocktailsList(sortCocktailsOnFavorites(cocktailsList.filter(c => c._id !== cocktailID), 
+            favoriteCocktailsList.filter(id => id !== cocktailID)));
         }
     }
 
@@ -120,7 +82,7 @@ const MyFavoritesLayout = ({checkLoggedIn}: MyFavoritesLayoutProps) => {
                     <Heading size='lg' mt={10} px={4}></Heading>
                     <Box w='100%' h='100%'>
                         <CocktailsList cocktailsList={cocktailsList} favoritesList={favoriteCocktailsList} 
-                            onFavoriteClick={toggleFavorite}/>
+                            onFavoriteClick={unfavorite}/>
                     </Box> 
                 </Stack>
             )}

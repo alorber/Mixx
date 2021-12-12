@@ -1,7 +1,13 @@
 import CocktailsList from '../../ui/CocktailsList/CocktailsList';
 import React, { useEffect, useState } from 'react';
 import { Box, Heading, Stack } from '@chakra-ui/react';
-import { Cocktail, favoriteCocktail, getFavoritedCocktails, getPossibleCocktails, unfavoriteCocktail } from '../../../services/api';
+import { Cocktail, getPossibleCocktails } from '../../../services/api';
+import {
+    getSavedCocktails,
+    setFavorite,
+    setUnfavorite,
+    sortCocktailsOnFavorites
+    } from '../../../Functions/cocktails';
 
 type MyCocktailsLayoutProps = {
     checkLoggedIn: () => void,
@@ -26,45 +32,11 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
         }
     }
 
-    const getSavedCocktails = async () => {
-        checkLoggedIn();
-        const resp = await getFavoritedCocktails();
-        if(resp.status == "Success") {
-            setFavoriteCocktailsList(resp.cocktailIDs);
-            setErrorCode(null);
-            return resp.cocktailIDs;
-        } else {
-            setErrorCode(resp.errorCode);
-            checkLoggedIn();
-            return null;
-        }
-    }
-
     const getSortedCocktails = async() => {
-        const favorites = await getSavedCocktails();
+        const favorites = await getSavedCocktails(checkLoggedIn, setFavoriteCocktailsList, setErrorCode);
         const cocktails = await getCocktails();
-        sortCocktails(cocktails, favorites);
+        setCocktailsList(sortCocktailsOnFavorites(cocktails, favorites));
         setIsLoading(false);
-    }
-
-    const sortCocktails = (cocktails: Cocktail[] | null, favorites: string[] | null) => {
-        if(cocktails == null || favorites == null) {
-            return;
-        }
-
-        const sortedCocktail = [...cocktails]
-        sortedCocktail.sort((c1, c2) => {
-            const isC1Favorited = favorites?.includes(c1._id);
-            const isC2Favorited = favorites?.includes(c2._id);
-
-            // Both favorited or neither
-            if((isC1Favorited && isC2Favorited) || (!isC1Favorited && !isC2Favorited)) {
-                // Sort alphabetically
-                return c1.name.toLowerCase() < c2.name.toLowerCase() ? -1 : 1;
-            }
-            return isC1Favorited ? -1 : 1;
-        })
-        setCocktailsList(sortedCocktail);
     }
 
     useEffect(() => {
@@ -72,36 +44,20 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
         getSortedCocktails();
     }, [])
 
-    const setFavorite = async (cocktailID: string) => {
-        const resp = await favoriteCocktail(cocktailID);
-        
-        if(resp.status == "Success") {
-            setFavoriteCocktailsList([...favoriteCocktailsList, cocktailID]);
-            sortCocktails(cocktailsList, [...favoriteCocktailsList, cocktailID]);
-        } else {
-            setErrorCode(resp.errorCode);
-            checkLoggedIn();
-        }
-    }
-
-    const setUnfavorite = async (cocktailID: string) => {
-        const resp = await unfavoriteCocktail(cocktailID);
-        
-        if(resp.status == "Success") {
-            setFavoriteCocktailsList(favoriteCocktailsList.filter(id => id !== cocktailID));
-            sortCocktails(cocktailsList, favoriteCocktailsList.filter(id => id !== cocktailID));
-        } else {
-            setErrorCode(resp.errorCode);
-            checkLoggedIn();
-        }
-    }
-
-    const toggleFavorite = (cocktailID: string) => {
+    const toggleFavorite = async (cocktailID: string) => {
         checkLoggedIn();
         if(favoriteCocktailsList.includes(cocktailID)) {
-            setUnfavorite(cocktailID);
+            const success = await setUnfavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList,
+                    setErrorCode, cocktailID);
+            if(success) {
+                setCocktailsList(sortCocktailsOnFavorites(cocktailsList, favoriteCocktailsList.filter(id => id !== cocktailID)));
+            }
         } else {
-            setFavorite(cocktailID);
+            const success = await setFavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList,
+                    setErrorCode, cocktailID);
+            if(success) {
+                setCocktailsList(sortCocktailsOnFavorites(cocktailsList, [...favoriteCocktailsList, cocktailID]));
+            }
         }
     }
 

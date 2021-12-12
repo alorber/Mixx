@@ -2,7 +2,8 @@ import IngredientsList from '../../ui/IngredientsList/IngredientsList';
 import React from 'react';
 import SearchBar from '../../ui/SearchBar/SearchBar';
 import { Box, Heading, Stack } from '@chakra-ui/react';
-import { CATEGORIES_LIST, CategorizedIngredients, getCategorizedIngredients } from '../../../services/api';
+import { CategorizedIngredients } from '../../../services/api';
+import { getIngredientsCategorized } from '../../../Functions/ingredients';
 import { useEffect, useState } from 'react';
         
 type AllIngredientsLayoutProps = {
@@ -19,16 +20,10 @@ const AllIngredientsLayout = ({}: AllIngredientsLayoutProps) => {
     // Get List of Ingredients
     const getAllIngredients = async () => {
         setIsLoading(true);
-        const resp = await getCategorizedIngredients()
-        if(resp.status === "Success") {
-            setIngredientsList(resp.ingredients);
-            setSearchResults(resp.ingredients);
-            setErrorCode(null);
-        }
-        // Error
-        else {
-            setErrorCode(resp.errorCode);
-        }
+        getIngredientsCategorized(setErrorCode, (ingredients: CategorizedIngredients) => {
+            setIngredientsList(ingredients);
+            setSearchResults(ingredients);
+        })
         setIsLoading(false);
     }
 

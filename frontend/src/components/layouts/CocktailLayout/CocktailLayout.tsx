@@ -9,10 +9,23 @@ import {
     Image,
     Stack
     } from '@chakra-ui/react';
-import { Cocktail, dislikeCocktail, getCocktailInfo, getGlasswareInfo, getIngredientsInfo, getLikeDislikeStatus, Glassware, Ingredient, likeCocktail, LikeDislikeStatus, removeDislikedCocktail, removeLikedCocktail } from '../../../services/api';
+import {
+    Cocktail,
+    dislikeCocktail,
+    getCocktailInfo,
+    getGlasswareInfo,
+    getIngredientsInfo,
+    getLikeDislikeStatus,
+    Glassware,
+    Ingredient,
+    likeCocktail,
+    LikeDislikeStatus,
+    removeDislikedCocktail,
+    removeLikedCocktail
+    } from '../../../services/api';
+import { FaThumbsDown, FaThumbsUp } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { FaThumbsDown, FaThumbsUp } from 'react-icons/fa';
 
 type CocktailLayoutProps = {
     isLoggedIn: boolean,
