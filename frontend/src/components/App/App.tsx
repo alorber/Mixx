@@ -44,7 +44,7 @@ const App = () => {
           <Route path='/ingredients' element={<AllIngredientsLayout />}/>
           <Route path='/cocktails/:cocktail_id' element={<CocktailLayout isLoggedIn={loggedIn} checkLoggedIn={checkLoggedIn} />}/>
           <Route path='/cocktails' element={<AllCocktailsLayout isLoggedIn={loggedIn} checkLoggedIn={checkLoggedIn} />}/>
-          <Route path='/settings' element={showIfLoggedIn(<SettingsLayout />)}/>
+          <Route path='/settings' element={showIfLoggedIn(<SettingsLayout checkLoggedIn={checkLoggedIn} />)}/>
         </Routes>
       </Stack>
    </BrowserRouter>

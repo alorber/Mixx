@@ -1,13 +1,17 @@
 import React from 'react';
 import { Box, Heading, Stack } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FormErrorMessage, FormPasswordInput, FormSubmitButton, FormSuccessMessage, FormTextInput } from '../../ui/StyledFormFields/StyledFormFields';
-import { updateEmail } from '../../../services/api';
+import { updateEmail, updatePassword } from '../../../services/api';
 
 type SettingsLayoutProps = {
-
+    checkLoggedIn: () => void
 }
-const SettingsLayout = ({}: SettingsLayoutProps) => {
+const SettingsLayout = ({checkLoggedIn}: SettingsLayoutProps) => {
+
+    useEffect(() => {
+        checkLoggedIn();
+    }, [])
 
     return (
         <Stack mx={8} pt={10} px={6} pb={14}>
@@ -103,6 +107,7 @@ const UpdateEmailForm = () => {
             setFormValues({newEmail: '', password: ''});
         } else {
             setErrorCode(resp.errorCode);
+            setWasSuccess(false);
         }
         setIsLoading(false);
     }
@@ -130,6 +135,7 @@ const UpdatePasswordForm = () => {
     const [showPasswords, setShowPassword] = useState<{[key: string]: boolean}>({oldPassword: false, newPassword1: false, newPassword2: false})
     const [isLoading, setIsLoading] = useState(false);
     const [errorCode, setErrorCode] = useState<number | null>(null);
+    const [wasSuccess, setWasSuccess] = useState(false);
 
     const togglePasswordVisibility = (field: string) => {
         const passwords = {...showPasswords};
@@ -137,12 +143,39 @@ const UpdatePasswordForm = () => {
         setShowPassword(passwords);
     }
 
-    const onSubmit = () => {
-        
+    const onSubmit = async () => {
+        setIsLoading(true);
+
+        // Passwords don't match
+        if(formValues.newPassword1 !== formValues.newPassword2) {
+            setErrorCode(480);
+            setWasSuccess(false);
+        } 
+        else {
+            const resp = await updatePassword(formValues.oldPassword, formValues.newPassword1);
+            if(resp.status === "Success") {
+                // New password is same as old
+                if(formValues.newPassword1 === formValues.oldPassword) {
+                    setErrorCode(481);
+                    setWasSuccess(false);
+                } else {
+                    setErrorCode(null);
+                    setWasSuccess(true);
+                }
+            } else {
+                setErrorCode(resp.errorCode);
+                setWasSuccess(false);
+            }
+        }
+
+        setIsLoading(false);
     }
 
+    const successMessage = "Password successfully changed";
+
     return (
-        <SettingsLayoutForm title="Update Password" onSubmit={onSubmit} errorCode={errorCode}>
+        <SettingsLayoutForm title="Update Password" onSubmit={onSubmit} errorCode={errorCode}
+                successMessage={wasSuccess ? successMessage : null}>
             {/* Old Password Field */}
             <FormPasswordInput value={formValues.oldPassword} onChange={(v: string) => {setFormValues(updateForm(formValues, v, 'oldPassword'))}} 
                 showPassword={showPasswords.oldPassword} label='Old Password'

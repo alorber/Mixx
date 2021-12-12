@@ -100,7 +100,6 @@ def login():
 
     # Check if password matches
     authorized = bcrypt.check_password_hash(user['password'], login_info['password'])
-
     if authorized:
         session['user_id'] = str(user['_id'])
         return {'userID': str(user['_id']), 'firstName': user['first_name'], 'lastName': user['last_name']}, 200
@@ -186,7 +185,8 @@ def update_password(user_id):
         # ERROR: Incorrect Password
         return {}, 462
 
-    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': update_info['newPassword']}})
+    password_hash = bcrypt.generate_password_hash(update_info['newPassword'])
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': password_hash}})
 
     # Check for success
     if update_resp.modified_count > 0:

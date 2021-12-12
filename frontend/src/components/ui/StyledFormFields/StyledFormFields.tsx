@@ -84,10 +84,12 @@ export type FormErrorMessageProps = {
 }
 export const FormErrorMessage = ({errorCode, isLoggedIn = false}: FormErrorMessageProps) => {
     const errorCodeToMessage: {[code: number]: string} = {
-        460: "It looks like you already have an account.",
-        461: "Please enter a valid email & password.",
-        462: isLoggedIn ? "Incorrect Password." : "Please enter a valid email & password.",
-        500: "We seem to be having some trouble right now."
+        460: "It looks like you already have an account",
+        461: "Please enter a valid email & password",
+        462: isLoggedIn ? "Incorrect Password" : "Please enter a valid email & password",
+        480: "Passwords do not match",
+        481: "New password cannot match old password",
+        500: "We seem to be having some trouble right now"
     }
   
     return (
