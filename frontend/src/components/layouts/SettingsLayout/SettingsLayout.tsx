@@ -2,7 +2,8 @@ import React from 'react';
 import { Box, Heading, Stack } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import { FormErrorMessage, FormPasswordInput, FormSubmitButton, FormSuccessMessage, FormTextInput } from '../../ui/StyledFormFields/StyledFormFields';
-import { deleteAccount, updateEmail, updatePassword } from '../../../services/api';
+import { deleteAccount, logout, updateEmail, updatePassword } from '../../../services/api';
+import { useNavigate } from 'react-router-dom';
 
 type SettingsLayoutProps = {
     checkLoggedIn: () => void
@@ -19,7 +20,7 @@ const SettingsLayout = ({checkLoggedIn}: SettingsLayoutProps) => {
                 <Heading>Settings</Heading>
             </Box>
             <Stack spacing={6}>
-                <LogoutButton />
+                <LogoutButton checkLoggedIn={checkLoggedIn} />
                 <UpdateNameForm />
                 <UpdateEmailForm />
                 <UpdatePasswordForm />
@@ -226,11 +227,20 @@ const DeleteAccountForm = ({checkLoggedIn}: {checkLoggedIn: () => void}) => {
 
 
 // Logout
-const LogoutButton = () => {
+const LogoutButton = ({checkLoggedIn}: {checkLoggedIn: () => void}) => {
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const onClick = () => {
+    const onClick = async () => {
+        setIsLoading(true);
 
+        const resp = await logout();
+        if(resp.status === "Success") {
+            checkLoggedIn();
+            navigate('/');
+        }
+
+        setIsLoading(false);
     }
 
     return (
