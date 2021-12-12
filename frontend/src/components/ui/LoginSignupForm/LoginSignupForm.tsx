@@ -1,20 +1,16 @@
 import {
-    Alert,
-    AlertDescription,
-    AlertIcon,
     Box,
-    Button,
     Flex,
-    FormControl,
-    FormLabel,
     Heading,
-    Input,
-    InputGroup,
-    InputRightElement,
     Link,
     Stack
     } from '@chakra-ui/react';
-import { FormPasswordInput, FormSubmitButton, FormTextInput } from '../../ui/StyledFormFields/StyledFormFields';
+import {
+    FormErrorMessage,
+    FormPasswordInput,
+    FormSubmitButton,
+    FormTextInput
+    } from '../../ui/StyledFormFields/StyledFormFields';
 import { login, signup } from '../../../services/api';
 import { useState } from 'react';
 
@@ -100,24 +96,6 @@ const LoginSignupForm = ({updateLoggedIn}: {updateLoggedIn: (l: boolean) => void
         </Stack>
     );
 };
-
-// Error Message
-const FormErrorMessage = ({errorCode}: {errorCode: number}) => {
-  const errorCodeToMessage: {[code: number]: string} = {
-    460: "It looks like you already have an account.",
-    461: "Please enter a valid email & password.",
-    462: "Please enter a valid email & password."
-  }
-
-  return (
-    <Box my={4}>
-      <Alert status={'error'} borderRadius={4}>
-        <AlertIcon />
-        <AlertDescription>{errorCodeToMessage[errorCode]}</AlertDescription>
-      </Alert>
-    </Box>
-  );
-}
 
 // Button to switch forms (login <--> signup)
 type FormSwitchTextProps = {

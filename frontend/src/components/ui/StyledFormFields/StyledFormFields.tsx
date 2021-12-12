@@ -1,6 +1,8 @@
 import React from 'react';
-import { Button, FormControl, FormLabel, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
+import { Alert, AlertDescription, AlertIcon, Box, Button, FormControl, FormLabel, Input, InputGroup, InputRightElement } from '@chakra-ui/react';
+import { isLoggedIn } from '../../../services/api';
 
+// Text Input
 export type FormTextInputProps = {
     value: string,
     onChange: (v: string) => void,
@@ -21,6 +23,7 @@ export const FormTextInput = ({value, onChange, label, type, placeholder, ariaLa
     );
 }
 
+// Password Input
 export type FormPasswordInputProps = {
     value: string,
     onChange: (v: string) => void,
@@ -54,6 +57,7 @@ export const FormPasswordInput = (
     );
 }
 
+// Submit Button
 export type FormSubmitButtonProps = {
     isLoading: boolean,
     label: string,
@@ -70,5 +74,45 @@ export const FormSubmitButton = ({isLoading, label, isLogout= false, onClick}: F
                 onClick={onClick} >
             {label}
         </Button>
+    );
+}
+
+// Error Message
+export type FormErrorMessageProps = {
+    errorCode: number,
+    isLoggedIn?: boolean
+}
+export const FormErrorMessage = ({errorCode, isLoggedIn = false}: FormErrorMessageProps) => {
+    const errorCodeToMessage: {[code: number]: string} = {
+        460: "It looks like you already have an account.",
+        461: "Please enter a valid email & password.",
+        462: isLoggedIn ? "Incorrect Password." : "Please enter a valid email & password.",
+        500: "We seem to be having some trouble right now."
+    }
+  
+    return (
+      <Box my={4}>
+        <Alert status={'error'} borderRadius={4}>
+          <AlertIcon />
+          <AlertDescription>{errorCodeToMessage[errorCode]}</AlertDescription>
+        </Alert>
+      </Box>
+    );
+}
+
+// Success Message
+export type FormSuccessMessageProps = {
+    message: string,
+}
+
+export const FormSuccessMessage = ({message}: FormSuccessMessageProps) => {
+
+    return (
+        <Box my={4}>
+        <Alert status={'success'} borderRadius={4}>
+          <AlertIcon />
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      </Box>
     );
 }
