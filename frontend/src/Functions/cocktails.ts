@@ -106,6 +106,7 @@ export const sortCocktailsOnFavorites = (
     return sortedCocktails;
 }
 
+// Favorite Button Click
 export const toggleFavorite = async (
     checkLoggedIn: (() => void),
     favoriteCocktailsList: string[] | null,
@@ -139,8 +140,9 @@ export const toggleFavorite = async (
 ////////////////////////////////////////////////////////////
 //      Searching Cocktails
 ///////////////////////////////////////////////////////////
+
 export type SearchType = "CocktailName" | "Ingredient" | "Glassware";
-export const buildSearchResults = (
+export const buildCocktailsSearchResults = (
     cocktailsList: Cocktail[] | null,
     ingredientsDict: {[key: string]: Ingredient} | null,
     glasswareDict: {[key: string]: Glassware} | null,

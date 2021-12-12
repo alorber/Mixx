@@ -2,18 +2,16 @@ import CocktailsList from '../../ui/CocktailsList/CocktailsList';
 import React from 'react';
 import SearchBar from '../../ui/SearchBar/SearchBar';
 import { Box, Heading, Stack } from '@chakra-ui/react';
-import { buildGlasswareDict } from '../../../Functions/glassware';
-import { buildIngredientDict, getIngredients } from '../../../Functions/ingredients';
 import {
-    buildSearchResults,
+    buildCocktailsSearchResults,
     getCocktails,
     getSavedCocktails,
     SearchType,
-    setFavorite,
-    setUnfavorite,
     sortCocktailsOnFavorites,
     toggleFavorite
     } from '../../../Functions/cocktails';
+import { buildGlasswareDict } from '../../../Functions/glassware';
+import { buildIngredientDict } from '../../../Functions/ingredients';
 import {
     Cocktail,
     getAllGlassware,
@@ -40,7 +38,7 @@ const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps
 
     // Build Search Results
     const loadSearchResults = () => {
-        const results = buildSearchResults(cocktailsList, ingredientsDict, glasswareDict,
+        const results = buildCocktailsSearchResults(cocktailsList, ingredientsDict, glasswareDict,
             favoriteCocktailsList, searchString, searchTypes);
         
         if(results !== null) {

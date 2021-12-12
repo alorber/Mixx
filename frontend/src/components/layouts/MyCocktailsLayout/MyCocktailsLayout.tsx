@@ -1,17 +1,22 @@
 import CocktailsList from '../../ui/CocktailsList/CocktailsList';
 import React, { useEffect, useState } from 'react';
+import SearchBar from '../../ui/SearchBar/SearchBar';
 import { Box, Heading, Stack } from '@chakra-ui/react';
-import { Cocktail, getPossibleCocktails, Glassware, Ingredient } from '../../../services/api';
 import {
-    buildSearchResults,
+    buildCocktailsSearchResults,
     getSavedCocktails,
     SearchType,
     sortCocktailsOnFavorites,
     toggleFavorite
     } from '../../../Functions/cocktails';
-import { buildIngredientDict, getIngredients } from '../../../Functions/ingredients';
 import { buildGlasswareDict } from '../../../Functions/glassware';
-import SearchBar from '../../ui/SearchBar/SearchBar';
+import { buildIngredientDict } from '../../../Functions/ingredients';
+import {
+    Cocktail,
+    getPossibleCocktails,
+    Glassware,
+    Ingredient
+    } from '../../../services/api';
 
 type MyCocktailsLayoutProps = {
     checkLoggedIn: () => void,
@@ -43,7 +48,7 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
 
     // Build Search Results
     const loadSearchResults = () => {
-        const results = buildSearchResults(cocktailsList, ingredientsDict, glasswareDict,
+        const results = buildCocktailsSearchResults(cocktailsList, ingredientsDict, glasswareDict,
             favoriteCocktailsList, searchString, searchTypes);
         
         if(results !== null) {
@@ -79,7 +84,7 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
         <Heading pt={10}>Loading Cocktails...</Heading>
     ) : (
         <Stack h='100%' w='100%'>
-            <Heading size='lg' mt={10} px={4}>Here are some cocktails that you can make</Heading>
+            <Heading size='lg' mt={10} px={4} mb={4}>Here are some cocktails that you can make</Heading>
             {searchResults === null || cocktailsList === null || cocktailsList === undefined ? (
                 <Stack p={8} maxW={700} w={'100%'} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
                         overflowY={'auto'} style={{marginLeft: 'auto', marginRight: 'auto', marginTop: 60}}>
