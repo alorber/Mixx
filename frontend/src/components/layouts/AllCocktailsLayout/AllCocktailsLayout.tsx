@@ -2,22 +2,30 @@ import CocktailsList from '../../ui/CocktailsList/CocktailsList';
 import React from 'react';
 import SearchBar from '../../ui/SearchBar/SearchBar';
 import { Box, Heading, Stack } from '@chakra-ui/react';
+import { buildGlasswareDict } from '../../../Functions/glassware';
+import { buildIngredientDict, getIngredients } from '../../../Functions/ingredients';
+import {
+    buildSearchResults,
+    getCocktails,
+    getSavedCocktails,
+    SearchType,
+    setFavorite,
+    setUnfavorite,
+    sortCocktailsOnFavorites,
+    toggleFavorite
+    } from '../../../Functions/cocktails';
 import {
     Cocktail,
     getAllGlassware,
     Glassware,
     Ingredient
     } from '../../../services/api';
-import { getCocktails, getSavedCocktails, setFavorite, setUnfavorite, sortCocktailsOnFavorites, toggleFavorite } from '../../../Functions/cocktails';
-import { getIngredients } from '../../../Functions/ingredients';
 import { useEffect, useState } from 'react';
 
 type AllCocktailsLayoutProps = {
     isLoggedIn: boolean,
     checkLoggedIn: () => void
 };
-
-type SearchType = "CocktailName" | "Ingredient" | "Glassware";
 
 const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -30,68 +38,14 @@ const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps
     const [searchTypes, setSearchTypes]  = useState<SearchType[]>(["CocktailName", "Ingredient", "Glassware"]);
     const [searchResults, setSearchResults] = useState<Cocktail[] | null>(null);
 
-    // Get List of Glassware
-    const getGlassware = async() => {
-        const resp = await getAllGlassware();
-        if(resp.status === "Success") {
-            setErrorCode(null);
-            // Build dict
-            const idToGlassware: {[key: string]: Glassware} = {};
-            for(const glass of resp.glassware) {
-                idToGlassware[glass._id] = glass;
-            }
-            setGlasswareDict(idToGlassware);
-        } else {
-            setErrorCode(errorCode);
-        }
-    }
-
     // Build Search Results
     const loadSearchResults = () => {
-        if(cocktailsList === null || ingredientsDict === null || glasswareDict === null) {
-            return;
-        }
-
-        const searchTerm = searchString.trim().toLowerCase();
-
-        // If no search, show all
-        if(searchTerm === '') {
-            setSearchResults(sortCocktailsOnFavorites(cocktailsList, favoriteCocktailsList ?? []));
-        }
+        const results = buildSearchResults(cocktailsList, ingredientsDict, glasswareDict,
+            favoriteCocktailsList, searchString, searchTypes);
         
-        const results: Cocktail[] = [];
-
-        for(const cocktail of cocktailsList) {
-            let added = false;
-
-            // Filter by cocktail name
-            if(searchTypes.includes("CocktailName")) {
-                if(cocktail.name.toLowerCase().includes(searchTerm)) {
-                    results.push(cocktail);
-                    added = true;
-                }
-            }
-
-            // Filter by ingredient
-            if(searchTypes.includes("Ingredient") && !added) {
-                for(const ingredient of cocktail.ingredients) {
-                    if(ingredientsDict[ingredient.ingredient].name.toLowerCase().includes(searchTerm)) {
-                        results.push(cocktail);
-                        added = true;
-                        break;
-                    }
-                }
-            }
-
-            // Filter by glassware
-            if(searchTypes.includes("Glassware") && !added) {
-                if(glasswareDict[cocktail.glass].name.toLowerCase().includes(searchTerm)) {
-                    results.push(cocktail);
-                }
-            }
+        if(results !== null) {
+            setSearchResults(sortCocktailsOnFavorites(results, favoriteCocktailsList ?? []));
         }
-
-        setSearchResults(sortCocktailsOnFavorites(results, favoriteCocktailsList ?? []));
     }
 
     // Load everything
@@ -100,15 +54,8 @@ const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps
             setCocktailsList(cocktails);
             setSearchResults(cocktails);
         });
-        await getIngredients(setErrorCode, (ingredients: Ingredient[]) => {
-            // Build dict
-            const idToIngredient: {[key: string]: Ingredient} = {};
-            for(const ingredient of ingredients) {
-                idToIngredient[ingredient._id] = ingredient;
-            }
-            setIngredientsDict(idToIngredient);
-        });
-        await getGlassware();
+        await buildIngredientDict(setErrorCode, setIngredientsDict);
+        await buildGlasswareDict(setErrorCode, setGlasswareDict);
         if(isLoggedIn) {
            await getSavedCocktails(checkLoggedIn, setFavoriteCocktailsList, setErrorCode); 
         }

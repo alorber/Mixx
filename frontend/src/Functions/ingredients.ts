@@ -35,3 +35,18 @@ export const getIngredientsCategorized = async (
         setErrorCode(resp.errorCode);
     }
 }
+
+// Build Ingredients Dict: ID -> Ingredient
+export const buildIngredientDict = async (
+    setErrorCode: (e: number | null) => void,
+    setIngredientsDict: (d: {[key: string]: Ingredient}) => void
+) => {
+    await getIngredients(setErrorCode, (ingredients: Ingredient[]) => {
+        // Build dict
+        const idToIngredient: {[key: string]: Ingredient} = {};
+        for(const ingredient of ingredients) {
+            idToIngredient[ingredient._id] = ingredient;
+        }
+        setIngredientsDict(idToIngredient);
+    });
+}

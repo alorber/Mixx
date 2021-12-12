@@ -1,4 +1,4 @@
-import { Cocktail, favoriteCocktail, getAllCocktails, getFavoritedCocktails, unfavoriteCocktail } from "../services/api";
+import { Cocktail, favoriteCocktail, getAllCocktails, getFavoritedCocktails, Glassware, Ingredient, unfavoriteCocktail } from "../services/api";
 
 // Helper Functions for Cocktails
 
@@ -134,4 +134,62 @@ export const toggleFavorite = async (
             setCocktailsList(sortCocktailsOnFavorites(cocktailsList, [...favoriteCocktailsList, cocktailID]));
         }
     }
+}
+
+////////////////////////////////////////////////////////////
+//      Searching Cocktails
+///////////////////////////////////////////////////////////
+export type SearchType = "CocktailName" | "Ingredient" | "Glassware";
+export const buildSearchResults = (
+    cocktailsList: Cocktail[] | null,
+    ingredientsDict: {[key: string]: Ingredient} | null,
+    glasswareDict: {[key: string]: Glassware} | null,
+    favoriteCocktailsList: string[] | null,
+    searchString: string,
+    searchTypes: SearchType[]
+): Cocktail[] | null => {
+    if(cocktailsList === null || ingredientsDict === null || glasswareDict === null) {
+        return null;
+    }
+
+    const searchTerm = searchString.trim().toLowerCase();
+
+    // If no search, show all
+    if(searchTerm === '') {
+        return sortCocktailsOnFavorites(cocktailsList, favoriteCocktailsList ?? []);
+    }
+    
+    const results: Cocktail[] = [];
+
+    for(const cocktail of cocktailsList) {
+        let added = false;
+
+        // Filter by cocktail name
+        if(searchTypes.includes("CocktailName")) {
+            if(cocktail.name.toLowerCase().includes(searchTerm)) {
+                results.push(cocktail);
+                added = true;
+            }
+        }
+
+        // Filter by ingredient
+        if(searchTypes.includes("Ingredient") && !added) {
+            for(const ingredient of cocktail.ingredients) {
+                if(ingredientsDict[ingredient.ingredient].name.toLowerCase().includes(searchTerm)) {
+                    results.push(cocktail);
+                    added = true;
+                    break;
+                }
+            }
+        }
+
+        // Filter by glassware
+        if(searchTypes.includes("Glassware") && !added) {
+            if(glasswareDict[cocktail.glass].name.toLowerCase().includes(searchTerm)) {
+                results.push(cocktail);
+            }
+        }
+    }
+
+    return sortCocktailsOnFavorites(results, favoriteCocktailsList ?? []);
 }
