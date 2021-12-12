@@ -8,9 +8,9 @@ import {
     SearchType,
     sortCocktailsOnFavorites,
     toggleFavorite
-    } from '../../../Functions/cocktails';
-import { buildGlasswareDict } from '../../../Functions/glassware';
-import { buildIngredientDict } from '../../../Functions/ingredients';
+    } from '../../../functions/cocktails';
+import { buildGlasswareDict } from '../../../functions/glassware';
+import { buildIngredientDict } from '../../../functions/ingredients';
 import {
     Cocktail,
     getPossibleCocktails,

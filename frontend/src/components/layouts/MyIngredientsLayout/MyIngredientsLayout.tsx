@@ -9,7 +9,7 @@ import {
     removeIngredient,
     restructureUserList,
     saveIngredients
-    } from '../../../Functions/ingredients';
+    } from '../../../functions/ingredients';
 import {
     Box,
     Button,

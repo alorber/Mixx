@@ -13,7 +13,7 @@ import { CloseIcon } from '@chakra-ui/icons';
 import { FaCocktail, FaGlassMartini } from 'react-icons/fa';
 import { GiBrandyBottle } from 'react-icons/gi';
 import { useState } from 'react';
-import { SearchType } from '../../../Functions/cocktails';
+import { SearchType } from '../../../functions/cocktails';
 
 type SearchBarProps = {
     setSearch: (s: string) => void,

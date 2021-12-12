@@ -1,6 +1,7 @@
 import React from 'react';
 import StyledListItem from '../../ui/StyledListItem/StyledListItem';
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
+import { CATEGORIES_LIST, CategorizedIngredients } from '../../../services/api';
 import {
     Collapse,
     Heading,
@@ -8,10 +9,6 @@ import {
     Stack,
     useDisclosure
     } from '@chakra-ui/react';
-import {
-    CATEGORIES_LIST,
-    CategorizedIngredients,
-    } from '../../../services/api';
 
 type IngredientsListProps = {
     ingredientsList: CategorizedIngredients,

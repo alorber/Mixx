@@ -9,15 +9,10 @@ import {
     SearchType,
     sortCocktailsOnFavorites,
     toggleFavorite
-    } from '../../../Functions/cocktails';
-import { buildGlasswareDict } from '../../../Functions/glassware';
-import { buildIngredientDict } from '../../../Functions/ingredients';
-import {
-    Cocktail,
-    getAllGlassware,
-    Glassware,
-    Ingredient
-    } from '../../../services/api';
+    } from '../../../functions/cocktails';
+import { buildGlasswareDict } from '../../../functions/glassware';
+import { buildIngredientDict } from '../../../functions/ingredients';
+import { Cocktail, Glassware, Ingredient } from '../../../services/api';
 import { useEffect, useState } from 'react';
 
 type AllCocktailsLayoutProps = {

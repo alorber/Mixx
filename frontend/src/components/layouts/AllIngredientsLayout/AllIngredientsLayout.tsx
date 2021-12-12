@@ -2,8 +2,8 @@ import IngredientsList from '../../ui/IngredientsList/IngredientsList';
 import React from 'react';
 import SearchBar from '../../ui/SearchBar/SearchBar';
 import { Box, Heading, Stack } from '@chakra-ui/react';
+import { buildIngredientsSearchResults, getIngredientsCategorized } from '../../../functions/ingredients';
 import { CategorizedIngredients } from '../../../services/api';
-import { buildIngredientsSearchResults, getIngredientsCategorized } from '../../../Functions/ingredients';
 import { useEffect, useState } from 'react';
         
 type AllIngredientsLayoutProps = {
