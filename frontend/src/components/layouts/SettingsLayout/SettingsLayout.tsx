@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Heading, Stack } from '@chakra-ui/react';
 import { useState, useEffect } from 'react';
 import { FormErrorMessage, FormPasswordInput, FormSubmitButton, FormSuccessMessage, FormTextInput } from '../../ui/StyledFormFields/StyledFormFields';
-import { updateEmail, updatePassword } from '../../../services/api';
+import { deleteAccount, updateEmail, updatePassword } from '../../../services/api';
 
 type SettingsLayoutProps = {
     checkLoggedIn: () => void
@@ -23,7 +23,7 @@ const SettingsLayout = ({checkLoggedIn}: SettingsLayoutProps) => {
                 <UpdateNameForm />
                 <UpdateEmailForm />
                 <UpdatePasswordForm />
-                <DeleteAccountForm />
+                <DeleteAccountForm checkLoggedIn={checkLoggedIn} />
             </Stack>
         </Stack>
     );
@@ -195,14 +195,23 @@ const UpdatePasswordForm = () => {
 
 
 // Delete Account
-const DeleteAccountForm = () => {
+const DeleteAccountForm = ({checkLoggedIn}: {checkLoggedIn: () => void}) => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errorCode, setErrorCode] = useState<number | null>(null);
 
-    const onSubmit = () => {
-        
+    const onSubmit = async () => {
+        setIsLoading(true);
+
+        const resp = await deleteAccount(password);
+        if(resp.status === "Success") {
+            checkLoggedIn();
+        } else {
+            setErrorCode(resp.errorCode);
+        }
+
+        setIsLoading(false);
     }
 
     return (
