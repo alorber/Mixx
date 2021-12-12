@@ -9,6 +9,7 @@ import {
     Stack,
     useDisclosure
     } from '@chakra-ui/react';
+import { Link as RouterLink } from 'react-router-dom';
 
 type IngredientsListProps = {
     ingredientsList: CategorizedIngredients,
@@ -85,15 +86,23 @@ const IngredientsListItem = (
 ) => {
     return (
         <Stack spacing={4} w='100%'>
-            <Link _focus={{outline: "none"}} role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
-                    _hover={{textDecoration: "none", 
-                    bg: ingredient.hasOwnProperty('owned') ? (ingredient.owned ?  '#E5A5A6' : '#A8E28E') : '#eaf6ff'}} 
-                    onClick={(e) => {e.preventDefault(); onClick(ingredient.id)}}>
-                <StyledListItem hoverIconType={
-                    ingredient.hasOwnProperty('owned') ? (ingredient.owned ? MinusIcon : AddIcon) : undefined}>
-                    {ingredient.name}
-                </StyledListItem>
-            </Link>
+            {ingredient.hasOwnProperty('owned') ? (
+                <Link _focus={{outline: "none"}} role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
+                        _hover={{textDecoration: "none", bg: ingredient.owned ?  '#E5A5A6' : '#A8E28E'}} 
+                        onClick={(e) => {e.preventDefault(); onClick(ingredient.id)}}>
+                    <StyledListItem hoverIconType={ingredient.owned ? MinusIcon : AddIcon}>
+                        {ingredient.name}
+                    </StyledListItem>
+                </Link>
+            ) : (
+                <Link as={RouterLink} to={`/cocktails/?ingredient_id=${ingredient.id}`}  _focus={{outline: "none"}} 
+                        role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
+                        _hover={{textDecoration: "none", bg: '#eaf6ff'}}>
+                    <StyledListItem>
+                        {ingredient.name}
+                    </StyledListItem>
+                </Link>
+            )}
         </Stack>
     );
 }

@@ -14,6 +14,7 @@ import { buildGlasswareDict } from '../../../functions/glassware';
 import { buildIngredientDict } from '../../../functions/ingredients';
 import { Cocktail, Glassware, Ingredient } from '../../../services/api';
 import { useEffect, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 type AllCocktailsLayoutProps = {
     isLoggedIn: boolean,
@@ -21,6 +22,8 @@ type AllCocktailsLayoutProps = {
 };
 
 const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [searchedIngredient, setSearchedIngredient] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [cocktailsList, setCocktailsList] = useState<Cocktail[] | null>(null);
     const [favoriteCocktailsList, setFavoriteCocktailsList] = useState<string[] | null>(null);
@@ -33,7 +36,18 @@ const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps
 
     // Build Search Results
     const loadSearchResults = () => {
-        const results = buildCocktailsSearchResults(cocktailsList, ingredientsDict, glasswareDict,
+        // If searched ingredient, filter list
+        const cocktails = searchedIngredient !== null && cocktailsList !== null
+            ? [...cocktailsList].filter((cocktail: Cocktail) => {
+                for(const ingredient of cocktail.ingredients) {
+                    if(ingredient.ingredient === searchedIngredient) {
+                        return true;
+                    }
+                }
+                return false;
+            }) : cocktailsList;
+
+        const results = buildCocktailsSearchResults(cocktails, ingredientsDict, glasswareDict,
             favoriteCocktailsList, searchString, searchTypes);
         
         if(results !== null) {
@@ -43,6 +57,10 @@ const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps
 
     // Load everything
     const loadLists = async () => {
+        const searchedIngredientID = searchParams.get('ingredient_id') || '';
+        if(searchedIngredientID !== '') {
+            setSearchedIngredient(searchedIngredientID);
+        }
         await getCocktails(setErrorCode, (cocktails: Cocktail[]) => {
             setCocktailsList(cocktails);
             setSearchResults(cocktails);
@@ -75,7 +93,9 @@ const AllCocktailsLayout = ({isLoggedIn, checkLoggedIn}: AllCocktailsLayoutProps
         <Heading pt={10}>Loading Cocktails...</Heading>
     ) : searchResults !== null && ingredientsDict !== null && glasswareDict !== null ? (
         <Stack h='100%' w='100%'>
-            <Heading size='lg' mt={10} px={4}>All Cocktails</Heading>
+            <Heading size='lg' mt={10} px={4}>
+                All Cocktails {searchedIngredient !== null && `Containing ${ingredientsDict[searchedIngredient].name}`}
+            </Heading>
             <Stack h='85%' w='100%' maxW={1500} spacing={4} px={10} 
                     style={{marginLeft: 'auto', marginRight: 'auto', marginTop: 40}}>
                 <Heading size='md'>
