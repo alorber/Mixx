@@ -37,8 +37,4 @@ export const NAVBAR_ITEMS: Array<NavbarItem> = [
             }
         ]
     },
-    {
-        label: 'Search',
-        href: '/search'
-    }
 ] 

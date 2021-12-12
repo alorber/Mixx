@@ -73,7 +73,7 @@ export const setUnfavorite = async (
 ): Promise<boolean> => {
     const resp = await unfavoriteCocktail(cocktailID);
     
-    if(resp.status == "Success") {
+    if(resp.status === "Success") {
         setFavoriteCocktailsList(favoriteCocktailsList.filter(id => id !== cocktailID));
         return true;
     } else {
@@ -88,14 +88,13 @@ export const sortCocktailsOnFavorites = (
     cocktails: Cocktail[] | null,
     favorites: string[] | null,
 ): Cocktail[] | null => {
-    if(cocktails == null || favorites == null) {
+    if(cocktails === null || favorites === null) {
         return null;
     }
-
     const sortedCocktails = [...cocktails]
     sortedCocktails.sort((c1, c2) => {
-        const isC1Favorited = favorites?.includes(c1._id);
-        const isC2Favorited = favorites?.includes(c2._id);
+        const isC1Favorited = favorites.includes(c1._id);
+        const isC2Favorited = favorites.includes(c2._id);
 
         // Both favorited or neither
         if((isC1Favorited && isC2Favorited) || (!isC1Favorited && !isC2Favorited)) {
@@ -105,4 +104,34 @@ export const sortCocktailsOnFavorites = (
         return isC1Favorited ? -1 : 1;
     })
     return sortedCocktails;
+}
+
+export const toggleFavorite = async (
+    checkLoggedIn: (() => void),
+    favoriteCocktailsList: string[] | null,
+    setFavoriteCocktailsList: (f: string[]) => void,
+    cocktailsList: Cocktail[] | null,
+    setCocktailsList: (c: Cocktail[] | null) => void,
+    setErrorCode: (e: number | null) => void,
+    cocktailID: string
+) => {
+    checkLoggedIn();
+
+    if(favoriteCocktailsList === null) {
+        return;
+    }
+
+    if(favoriteCocktailsList.includes(cocktailID)) {
+        const success = await setUnfavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList,
+                setErrorCode, cocktailID);
+        if(success) {
+            setCocktailsList(sortCocktailsOnFavorites(cocktailsList, favoriteCocktailsList.filter(id => id !== cocktailID)));
+        }
+    } else {
+        const success = await setFavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList,
+                setErrorCode, cocktailID);
+        if(success) {
+            setCocktailsList(sortCocktailsOnFavorites(cocktailsList, [...favoriteCocktailsList, cocktailID]));
+        }
+    }
 }

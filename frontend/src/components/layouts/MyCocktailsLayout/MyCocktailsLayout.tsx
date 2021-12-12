@@ -4,9 +4,8 @@ import { Box, Heading, Stack } from '@chakra-ui/react';
 import { Cocktail, getPossibleCocktails } from '../../../services/api';
 import {
     getSavedCocktails,
-    setFavorite,
-    setUnfavorite,
-    sortCocktailsOnFavorites
+    sortCocktailsOnFavorites,
+    toggleFavorite
     } from '../../../Functions/cocktails';
 
 type MyCocktailsLayoutProps = {
@@ -44,21 +43,9 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
         getSortedCocktails();
     }, [])
 
-    const toggleFavorite = async (cocktailID: string) => {
-        checkLoggedIn();
-        if(favoriteCocktailsList.includes(cocktailID)) {
-            const success = await setUnfavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList,
-                    setErrorCode, cocktailID);
-            if(success) {
-                setCocktailsList(sortCocktailsOnFavorites(cocktailsList, favoriteCocktailsList.filter(id => id !== cocktailID)));
-            }
-        } else {
-            const success = await setFavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList,
-                    setErrorCode, cocktailID);
-            if(success) {
-                setCocktailsList(sortCocktailsOnFavorites(cocktailsList, [...favoriteCocktailsList, cocktailID]));
-            }
-        }
+    const onClickFavorite = async (cocktailID: string) => {
+        toggleFavorite(checkLoggedIn, favoriteCocktailsList, setFavoriteCocktailsList,
+            cocktailsList, setCocktailsList, setErrorCode, cocktailID);
     }
 
     return (
@@ -86,7 +73,7 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
                     <Heading size='lg' mt={10} px={4}></Heading>
                     <Box w='100%' h='100%'>
                         <CocktailsList cocktailsList={cocktailsList} favoritesList={favoriteCocktailsList} 
-                            onFavoriteClick={toggleFavorite}/>
+                            onFavoriteClick={onClickFavorite}/>
                     </Box> 
                 </Stack>
             )}

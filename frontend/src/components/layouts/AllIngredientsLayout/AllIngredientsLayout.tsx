@@ -20,7 +20,7 @@ const AllIngredientsLayout = ({}: AllIngredientsLayoutProps) => {
     // Get List of Ingredients
     const getAllIngredients = async () => {
         setIsLoading(true);
-        getIngredientsCategorized(setErrorCode, (ingredients: CategorizedIngredients) => {
+        await getIngredientsCategorized(setErrorCode, (ingredients: CategorizedIngredients) => {
             setIngredientsList(ingredients);
             setSearchResults(ingredients);
         })
@@ -90,7 +90,7 @@ const AllIngredientsLayout = ({}: AllIngredientsLayoutProps) => {
                 <Heading size='md'>
                     Select an ingredient to view cocktails containing it
                 </Heading>
-                <SearchBar setSearch={setSearchString} />
+                <SearchBar setSearch={setSearchString} placeholderText="Search For Ingredients" />
                 <Box w='100%' h='100%'>
                     <IngredientsList ingredientsList={searchResults} />
                 </Box> 

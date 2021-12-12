@@ -7,14 +7,14 @@ import { Link as RouterLink } from 'react-router-dom';
 
 type CocktailsListProps = {
     cocktailsList: Cocktail[],
-    favoritesList: string[],
+    favoritesList?: string[] | null,
     onFavoriteClick: (cocktailID: string) => void
 }
 
-const CocktailsList = ({cocktailsList, favoritesList, onFavoriteClick}: CocktailsListProps) => {
+const CocktailsList = ({cocktailsList, favoritesList = null, onFavoriteClick}: CocktailsListProps) => {
 
     return (
-        <Stack p={8} maxW={700} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
+        <Stack p={8} maxW={700} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff"
                 overflowY={'auto'} ml='auto' mr='auto'>
             {cocktailsList.map((cocktail: Cocktail) => (
                 <CocktailsListItem cocktailID={cocktail._id} cocktailName={cocktail.name}
@@ -30,17 +30,19 @@ export default CocktailsList;
 type CocktailsListItemProps = {
     cocktailID: string,
     cocktailName: string,
-    favoritesList: string[],
+    favoritesList: string[] | null,
     onFavoriteClick: (cocktailID: string) => void
 }
 
 const CocktailsListItem = ({cocktailID, cocktailName, favoritesList, onFavoriteClick}: CocktailsListItemProps) => {
     return (
         <Stack direction='row'>
-            <IconButton onClick={() => {onFavoriteClick(cocktailID)}} _focus={{ outline: "none" }}
+            {favoritesList !== null && (
+                <IconButton onClick={() => {onFavoriteClick(cocktailID)}} _focus={{ outline: "none" }}
                 icon={<FaHeart color={favoritesList.includes(cocktailID) ? '#E5A5A6' : '#FFFFFF'} />} 
                 aria-label={'Favorite Toggle'} backgroundColor={'#eaf6ff'}
                 _hover={{ backgroundColor: '#b7e0ff' }} />
+            )}
             <Link as={RouterLink} to={`/cocktails/${cocktailID}`} _focus={{outline: "none"}}
                     role={'group'} display={'block'} p={2} rounded={'md'} w={'100%'}
                     _hover={{textDecoration: "none", bg: "#eaf6ff"}}>

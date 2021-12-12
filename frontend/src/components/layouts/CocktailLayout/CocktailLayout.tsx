@@ -48,11 +48,11 @@ const CocktailLayout = ({isLoggedIn, checkLoggedIn}: CocktailLayoutProps) => {
             const cocktail_data = cocktailResp.cocktail;
             
             // Capitalize Info
-            if(cocktail_data.directions !== '') {
+            if(cocktail_data.directions != null) {
                 cocktail_data.directions = 
                     cocktail_data.directions.charAt(0).toUpperCase() +  cocktail_data.directions.slice(1);
             }
-            if(cocktail_data.garnish !== '') {
+            if(cocktail_data.garnish != null) {
                 cocktail_data.garnish = 
                     cocktail_data.garnish.charAt(0).toUpperCase() +  cocktail_data.garnish.slice(1);
             }
@@ -79,11 +79,14 @@ const CocktailLayout = ({isLoggedIn, checkLoggedIn}: CocktailLayoutProps) => {
             }
 
             // Get Like / Dislike Status
-            const likeStatusResp = await getLikeDislikeStatus(cocktailResp.cocktail._id);
+            if(isLoggedIn) {
+               const likeStatusResp = await getLikeDislikeStatus(cocktailResp.cocktail._id);
             
-            if(likeStatusResp.status == "Success") {
-                setLikedStatus(likeStatusResp.likeStatus);
+                if(likeStatusResp.status == "Success") {
+                    setLikedStatus(likeStatusResp.likeStatus);
+                } 
             }
+            
         } else {
             setErrorCode(null);
         }
