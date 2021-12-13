@@ -89,6 +89,7 @@ export const FormErrorMessage = ({errorCode, isLoggedIn = false}: FormErrorMessa
         462: isLoggedIn ? "Incorrect Password" : "Please enter a valid email & password",
         480: "Passwords do not match",
         481: "New password cannot match old password",
+        483: "New name cannot match old name",
         500: "We seem to be having some trouble right now"
     }
   

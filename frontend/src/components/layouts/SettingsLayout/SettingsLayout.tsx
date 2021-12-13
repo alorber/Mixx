@@ -87,6 +87,15 @@ const UpdateNameForm = () => {
     }, []);
 
     const onSubmit = async () => {
+        setIsLoading(true)
+
+        // Name hasn't changed
+        if(formValues.firstName === oldName.firstName && formValues.lastName === oldName.lastName) {
+            setErrorCode(483);
+            setIsLoading(false);
+            return;
+        }
+
         const resp = await updateName(formValues.firstName, formValues.lastName);
         if(resp.status === "Success") {
             setErrorCode(null);
@@ -97,6 +106,7 @@ const UpdateNameForm = () => {
             setWasSuccess(false);
             setFormValues(JSON.parse(JSON.stringify(oldName)));
         }
+        setIsLoading(false);
     }
 
     const successMessage = "Name was successfully changed";
