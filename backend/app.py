@@ -128,12 +128,12 @@ def delete_account(user_id):
     if not is_auth_user(user_id):
         # ERROR: Unauthorized
         return {}, 401
-    
+
     # Check password
     if not get_check_password(user_id, request.get_json()['password']):
         # ERROR: Incorrect Password
         return {}, 462
-    
+
     # Delete User
     delete_result = user_db.delete_one({'_id': ObjectId(user_id)})
 
@@ -252,7 +252,7 @@ def update_user_ingredients(user_id):
 
     new_ingredients = [ObjectId(ingr_id) for ingr_id in update_info['newIngredients']]
     removed_ingredients = [ObjectId(ingr_id) for ingr_id in update_info['removedIngredients']]
-    
+
     modified_cnt = 0
     modified_cnt += user_db.update_one({'_id': ObjectId(user_id)}, {
         '$addToSet': {'ingredients': {'$each': new_ingredients}},
@@ -260,7 +260,7 @@ def update_user_ingredients(user_id):
     modified_cnt += user_db.update_one({'_id': ObjectId(user_id)}, {
         '$pull': {'ingredients': {'$in': removed_ingredients}}
     }).modified_count
-    
+
      # Check for success
     if modified_cnt > 0:
         ingredientIDs = user_db.find_one({'_id': ObjectId(user_id)}, {'ingredients': 1}).get('ingredients', [])
@@ -282,7 +282,7 @@ def get_possible_cocktails(user_id):
 
     if len(ingredients) == 0:
         return {'cocktails': []}, 200
-    
+
     # Get Cocktails
     cocktails = list(cocktail_db.aggregate([
         {
@@ -299,7 +299,6 @@ def get_possible_cocktails(user_id):
             }
         }
     ]))
-    
     return {'cocktails': cocktails_to_json(cocktails)}, 200
 
 # Get All Cocktails
@@ -353,22 +352,22 @@ def get_categorized_ingredients():
         {
             '$group': {
                 '_id': {
-                    'category': '$category', 
+                    'category': '$category',
                     'subcategory': '$subcategory'
-                }, 
+                },
                 'ingredients': {
                     '$addToSet': {
-                        'name': '$name', 
+                        'name': '$name',
                         'id': '$_id'
                     }
                 }
             }
         }, {
             '$group': {
-                '_id': '$_id.category', 
+                '_id': '$_id.category',
                 'subcategories': {
                     '$addToSet': {
-                        'ingredients': '$ingredients', 
+                        'ingredients': '$ingredients',
                         'subcategory': '$_id.subcategory'
                     }
                 }
@@ -380,7 +379,7 @@ def get_categorized_ingredients():
         return -1 if sc1['subcategory'] < sc2['subcategory'] else 1
     def sort_ingr(i1, i2):
         return -1 if i1['name'] < i2['name'] else 1
-    
+
     # Order categories in this order. Subcategories & ingredients are ordered alphabetically
     CATEGORY_ORDER = ['Spirits', 'Liqueurs', 'Wines and Champagnes', 'Beers and Ciders', 'Mixers', 'Other']
     categorized_ingr = {}
@@ -418,7 +417,7 @@ def like_cocktail(user_id):
         return {}, 401
 
     update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$addToSet': {'liked_cocktails': liked_cocktail}})
-    
+
      # Check for success
     if update_resp.modified_count > 0:
         return {}, 200
@@ -455,6 +454,7 @@ def dislike_cocktail(user_id):
         return {}, 401
 
     update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$addToSet': {'disliked_cocktails': disliked_cocktail}})
+
      # Check for success
     if update_resp.modified_count > 0:
         return {}, 200
@@ -537,7 +537,7 @@ def favorite_cocktail(user_id):
         return {}, 401
 
     update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$addToSet': {'favorite_cocktails': favorited_cocktail}})
-    
+
      # Check for success
     if update_resp.modified_count > 0:
         return {}, 200
@@ -570,7 +570,7 @@ def get_favorited_cocktails(user_id):
     if not is_auth_user(user_id):
         # ERROR: Unauthorized
         return {}, 401
-    
+
     favorite_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'favorite_cocktails': 1})['favorite_cocktails']
 
     return {'cocktails': [str(cocktail) for cocktail in favorite_cocktails] or []}, 200
@@ -595,6 +595,27 @@ def get_glassware_info(glassware_id):
     glassware['_id'] = str(glassware['_id'])
 
     return {'glassware': glassware}, 200
+
+# Recommend ingredients
+@app.route('/user/<user_id>/ingredients/recommendations', methods=['GET'])
+def get_recommended_ingredients(user_id):
+    ingredient_recommendations = {}
+    all_cocktails = list(cocktail_db.find({}))
+    ingredientIDs = user_db.find_one({'_id': ObjectId(user_id)}).get('ingredients', [])
+
+    for cocktail in all_cocktails:
+        ingredients = cocktail.get('ingredients', [])
+        cocktail_list = []
+        for ingredient in ingredients:
+            y = ingredient['ingredient']
+            cocktail_list.append(y)
+        dif = set(cocktail_list).difference(set(ingredientIDs))
+        if (len(dif) == 1):
+            if list(dif)[0] in ingredient_recommendations:
+                ingredient_recommendations[list(dif)[0]].append(cocktail.get('name'))
+            else:
+                ingredient_recommendations[list(dif)[0]] = [cocktail.get('name')]
+    return ingredient_recommendations
 
 if __name__ == "__main__":
     app.run(debug=True)
