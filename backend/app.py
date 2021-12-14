@@ -607,8 +607,8 @@ def get_recommended_ingredients(user_id):
         ingredients = cocktail.get('ingredients', [])
         cocktail_list = []
         for ingredient in ingredients:
-            y = ingredient['ingredient']
-            cocktail_list.append(y)
+            ingredient_ = ingredient['ingredient']
+            cocktail_list.append(ingredient_)
         dif = set(cocktail_list).difference(set(ingredientIDs))
         if (len(dif) == 1):
             if str(list(dif)[0]) in ingredient_recommendations:
@@ -616,6 +616,32 @@ def get_recommended_ingredients(user_id):
             else:
                 ingredient_recommendations[str(list(dif)[0])] = [{'id': str(cocktail['_id']), 'name': cocktail['name']}]
     return {'recommendations': ingredient_recommendations}, 200
+
+# Recommend cocktails based on liked recipes
+@app.route('/user/<user_id>/ingredients/recommendations', methods=['GET'])
+def get_recommended_cocktails(user_id):
+    favorites = user_db.find_one({'_id': ObjectId(user_id)}).get('favorite_cocktails', []) # Get user's favorite cocktails
+    all_cocktails = list(cocktail_db.find({}))
+    favorite_ingredients = {}
+    cocktail_recommendations = []
+    for cocktail in favorites:
+        ingredients = cocktail_db.find_one({'_id': cocktail}).get('ingredients', []) # Get ingredients for each cocktail
+        for ingredient in ingredients:
+            ingrdient_ = ingredient['ingredient']
+            if ingrdient_ in favorite_ingredients:
+                favorite_ingredients[ingrdient_] += 1
+            else:
+                favorite_ingredients[ingrdient_] = 1
+    for cocktail in all_cocktails:
+        ingredients = cocktail.get('ingredients', [])
+        cocktail_list = []
+        for ingredient in ingredients:
+            ingredient_ = ingredient['ingredient']
+            cocktail_list.append(ingredient_)
+        ingredient_intersection = set(cocktail_list).intersection(set(favorite_ingredients))  # Get cocktails that contain combos of these ingredients
+        if (len(ingredient_intersection) > 3):
+            cocktail_recommendations.append(cocktail.get('_id'))
+    return cocktail_recommendations
 
 if __name__ == "__main__":
     app.run(debug=True)
