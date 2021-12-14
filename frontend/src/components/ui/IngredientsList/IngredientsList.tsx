@@ -19,7 +19,7 @@ type IngredientsListProps = {
 
 const IngredientsList = ({ingredientsList, addIngredient = ()=>{}, removeIngredient= ()=>{}}: IngredientsListProps) => {
     return (
-        <Stack p={8} maxW={700} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
+        <Stack p={8} maxW={700} maxH={500} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff"
                 overflowY={'auto'} ml='auto' mr='auto'>
             {Object.keys(ingredientsList).length === 0 ? (
                 <Heading size='lg'>No Ingredients to Display</Heading>

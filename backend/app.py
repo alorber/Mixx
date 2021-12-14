@@ -611,11 +611,11 @@ def get_recommended_ingredients(user_id):
             cocktail_list.append(y)
         dif = set(cocktail_list).difference(set(ingredientIDs))
         if (len(dif) == 1):
-            if list(dif)[0] in ingredient_recommendations:
-                ingredient_recommendations[list(dif)[0]].append(cocktail.get('name'))
+            if str(list(dif)[0]) in ingredient_recommendations:
+                ingredient_recommendations[str(list(dif)[0])].append({'id': str(cocktail['_id']), 'name': cocktail['name']})
             else:
-                ingredient_recommendations[list(dif)[0]] = [cocktail.get('name')]
-    return ingredient_recommendations
+                ingredient_recommendations[str(list(dif)[0])] = [{'id': str(cocktail['_id']), 'name': cocktail['name']}]
+    return {'recommendations': ingredient_recommendations}, 200
 
 if __name__ == "__main__":
     app.run(debug=True)

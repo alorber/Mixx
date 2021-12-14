@@ -26,6 +26,7 @@ import {
 import { FaThumbsDown, FaThumbsUp } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { buildSelectedIngredientDict } from '../../../functions/ingredients';
 
 type CocktailLayoutProps = {
     isLoggedIn: boolean,
@@ -66,17 +67,10 @@ const CocktailLayout = ({isLoggedIn, checkLoggedIn}: CocktailLayoutProps) => {
             }
 
             // Get Ingredient Info
-            const ingredientIDs = cocktailResp.cocktail.ingredients.map((r) => r.ingredient);
-            const ingredientsResp = await getIngredientsInfo(ingredientIDs);
-            if(ingredientsResp.status === 'Success') {
-                const ingredientsMap = ingredientsResp.ingredients.reduce(
-                    (dict: {[key: string]: Ingredient}, ingredient: Ingredient) => {
-                        dict[ingredient._id] = ingredient;
-                        return dict;
-                    }, {}
-                )
-                setIngredientsDict(ingredientsMap);
-            }
+            const ingredientsMap = await buildSelectedIngredientDict(
+                cocktailResp.cocktail.ingredients.map((r) => r.ingredient)
+            );
+            setIngredientsDict(ingredientsMap);
 
             // Get Like / Dislike Status
             if(isLoggedIn) {

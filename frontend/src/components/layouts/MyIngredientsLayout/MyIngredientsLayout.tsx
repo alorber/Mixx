@@ -1,5 +1,6 @@
 import IngredientsList from '../../ui/IngredientsList/IngredientsList';
 import React from 'react';
+import RecommendedIngredientsList from '../../ui/RecommendedIngredientsList/RecommendedIngredientsList';
 import SearchBar from '../../ui/SearchBar/SearchBar';
 import {
     addIngredient,
@@ -18,7 +19,7 @@ import {
     Heading,
     Stack
     } from '@chakra-ui/react';
-import { CategorizedIngredients } from '../../../services/api';
+import { CategorizedIngredients, getIngredientRecommendations, IngredientRecommendations } from '../../../services/api';
 import { useEffect, useState } from 'react';
 
 type MyIngredientsLayoutProps = {
@@ -40,6 +41,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
     const [searchString, setSearchString] = useState<string>('');
     const [allIngredientsSearchResults, setAllIngredientsSearchResults] = useState<CategorizedIngredients | null>(null);
     const [userIngredientsSearchResults, setUserIngredientsSearchResults] = useState<CategorizedIngredients | null>(null);
+    const [ingredientRecommendations, setIngredientRecommendations] = useState<IngredientRecommendations | null>(null);
 
     // Marks user ingredients in master list
     const markUserIngredients = () => {
@@ -87,6 +89,10 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         getUserIngredients(setUserIngredientsErrorCode, 
             (ingredients: string[]) => {setUserIngredientIDs(ingredients)},
             checkLoggedIn);
+        const resp = await getIngredientRecommendations();
+        if(resp.status === "Success") {
+            setIngredientRecommendations(resp.recommendations);
+        }
     }
 
     // Load list on pageload
@@ -133,6 +139,10 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         await saveIngredients(checkLoggedIn, removedIngredientIDs, setRemovedIngredientIDs, 
             addedIngredientIDs, setAddedIngredientIDs, setUserIngredientIDs, 
             setIsSaving, setIsLoading, setUserIngredientsErrorCode);
+        const resp = await getIngredientRecommendations();
+        if(resp.status === "Success") {
+            setIngredientRecommendations(resp.recommendations);
+        }
     }
 
     return isSaving ? (
@@ -140,7 +150,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
     ) : isLoading ? (
         <Heading pt={10}>Loading Ingredients...</Heading>
     ) : allIngredientsSearchResults !== null && userIngredientsSearchResults !== null && userIngredientsErrorCode === null && allIngredientsErrorCode === null ? (
-        <Stack h='100%' w='100%'  px={10}>
+        <Stack minH='100%' w='100%' px={10}>
             <Heading size='lg' mt={10} px={4}>Let us know what you have in your kitchen</Heading>
             <Flex w='100%' justifyContent='center' pt={6} pb={6}>
                 <Button type='submit' w='100%' maxW={700} onClick={saveUserIngredients} boxShadow='sm' 
@@ -189,6 +199,9 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
                     </Box>
                 )}
             </Stack>
+            {ingredientRecommendations !== null && Object.keys(ingredientRecommendations).length > 0 && (
+               <RecommendedIngredientsList recommendedIngredients={ingredientRecommendations} /> 
+            )}
         </Stack>
     ) : (
         <Stack p={8} maxW={700} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "

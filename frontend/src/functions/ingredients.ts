@@ -1,4 +1,4 @@
-import { CATEGORIES_LIST, CategorizedIngredients, getAllIngredients, getCategorizedIngredients, getCurrentUserIngredients, Ingredient, updateUserIngredients } from '../services/api';
+import { CATEGORIES_LIST, CategorizedIngredients, getAllIngredients, getCategorizedIngredients, getCurrentUserIngredients, getIngredientsInfo, Ingredient, updateUserIngredients } from '../services/api';
 
 // Helper Functions for Ingredients
 
@@ -49,6 +49,24 @@ export const buildIngredientDict = async (
         }
         setIngredientsDict(idToIngredient);
     });
+}
+
+// Build Ingredients Dict for Selected Ingredients: ID -> Ingredient
+export const buildSelectedIngredientDict = async (
+    ingredientIDs: string[]
+) => {
+    const ingredientsResp = await getIngredientsInfo(ingredientIDs);
+    if(ingredientsResp.status === 'Success') {
+        const ingredientsMap = ingredientsResp.ingredients.reduce(
+            (dict: {[key: string]: Ingredient}, ingredient: Ingredient) => {
+                dict[ingredient._id] = ingredient;
+                return dict;
+            }, {}
+        )
+        return ingredientsMap;
+    } else {
+        return null;
+    }
 }
 
 ////////////////////////////////////////////////////////////
