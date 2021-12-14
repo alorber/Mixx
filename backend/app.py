@@ -21,6 +21,7 @@ db = client.Mixx
 cocktail_db = db.Cocktails
 ingr_db = db.Ingredients
 user_db = db.Users
+glassware_db = db.Glassware
 
 # ------ Helper Functions ------
 
@@ -47,6 +48,20 @@ def is_auth_user(user_id):
 def get_check_password(user_id, password):
     hashed_password = user_db.find_one({"_id": ObjectId(user_id)}, {'password': 1})['password']
     return bcrypt.check_password_hash(hashed_password, password)
+
+# Converts single cocktail response to JSON
+def cocktail_to_json(cocktail):
+    cocktail['_id'] = str(cocktail['_id'])
+    cocktail['glass'] = str(cocktail['glass'])
+    for ingredient in cocktail['ingredients']:
+        ingredient['ingredient'] = str(ingredient['ingredient'])
+    return cocktail
+
+# Converts cocktails list response to JSON
+def cocktails_to_json(cocktails):
+    for cocktail in cocktails:
+        cocktail = cocktail_to_json(cocktail)
+    return cocktails
 
 # ------ Routing ------
 
@@ -85,7 +100,6 @@ def login():
 
     # Check if password matches
     authorized = bcrypt.check_password_hash(user['password'], login_info['password'])
-
     if authorized:
         session['user_id'] = str(user['_id'])
         return {'userID': str(user['_id']), 'firstName': user['first_name'], 'lastName': user['last_name']}, 200
@@ -171,8 +185,43 @@ def update_password(user_id):
         # ERROR: Incorrect Password
         return {}, 462
 
-    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': update_info['newPassword']}})
+    password_hash = bcrypt.generate_password_hash(update_info['newPassword'])
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, {'$set': {'password': password_hash}})
 
+    # Check for success
+    if update_resp.modified_count > 0:
+        return {}, 200
+    else:
+        # Database Error
+        return {}, 500
+
+# Get Name
+@app.route('/user/<user_id>/name', methods=['GET'])
+def get_name(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    resp = user_db.find_one({'_id': ObjectId(user_id)}, {'first_name': 1, 'last_name': 1})
+
+    if resp != None:
+        return {'firstName': resp['first_name'], 'lastName': resp['last_name']}, 200
+    return {}, 500
+
+# Update Name
+@app.route('/user/<user_id>/updateName', methods=['POST'])
+def update_name(user_id):
+    update_info = request.get_json()
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    update_resp = user_db.update_one({'_id': ObjectId(user_id)}, 
+        {'$set': {'first_name': update_info['firstName'], 'last_name': update_info['lastName']}})
+    
     # Check for success
     if update_resp.modified_count > 0:
         return {}, 200
@@ -250,18 +299,18 @@ def get_possible_cocktails(user_id):
             }
         }
     ]))
-
-    return {'cocktails': cocktails}, 200
+    return {'cocktails': cocktails_to_json(cocktails)}, 200
 
 # Get All Cocktails
 @app.route('/cocktails', methods=['Get'])
 def get_all_cocktails():
-    return {'cocktails': list(cocktail_db.find({}))}, 200
+    return {'cocktails': cocktails_to_json(list(cocktail_db.find({})))}, 200
 
 # Get Specific Cocktail's Info
 @app.route('/cocktails/<cocktail_id>', methods=['Get'])
 def get_cocktail_info(cocktail_id):
-    return cocktail_db.find_one({"_id": ObjectId(cocktail_id)}), 200
+    cocktail_info = cocktail_db.find_one({"_id": ObjectId(cocktail_id)})
+    return {'cocktail': cocktail_to_json(cocktail_info)}, 200
 
 # Get Cocktails Containing Ingredient
 @app.route('/cocktails/containing/<ingredient_id>', methods=['Get'])
@@ -284,6 +333,17 @@ def get_cocktail_containing(ingredient_id):
             }
         }
     ]))}, 200
+
+# Get All Ingredients
+@app.route('/ingredients', methods=['GET'])
+def get_all_ingredients():
+    ingr_query_resp = list(ingr_db.find({}))
+
+    # Convert ObjectID -> String for JSON
+    for ingredient in ingr_query_resp:
+        ingredient['_id'] = str(ingredient['_id'])
+
+    return {'ingredients': ingr_query_resp}, 200
 
 # Get Categorized Ingredients
 @app.route('/ingredients/categorized', methods=['Get'])
@@ -334,6 +394,17 @@ def get_categorized_ingredients():
             categorized_ingr[category][subcategory['subcategory']] = ingredients
 
     return {'ingredients': categorized_ingr}, 200
+
+# Get Ingredients' Info (from IDs)
+@app.route('/ingredients/some', methods=['POST'])
+def get_ingredients_info():
+    ingredient_IDs = [ObjectId(ingredient_ID) for ingredient_ID in request.get_json()['ingredientIDs']]
+    ingredients_resp = list(ingr_db.find({'_id': {'$in': ingredient_IDs}}))
+
+    # Convert ObjectID --> String for JSON
+    for ingredient in ingredients_resp:
+        ingredient['_id'] = str(ingredient['_id'])
+    return {'ingredients': ingredients_resp}, 200
 
 # Like Cocktail
 @app.route('/user/<user_id>/cocktails/like', methods=['POST'])
@@ -391,7 +462,7 @@ def dislike_cocktail(user_id):
         # Database Error
         return {}, 500
 
-# Removed Liked Cocktail
+# Removed Disliked Cocktail
 @app.route('/user/<user_id>/cocktails/remove_dislike', methods=['POST'])
 def remove_disliked_cocktail(user_id):
     undisliked_cocktail = ObjectId(request.get_json()['cocktailID'])
@@ -419,7 +490,7 @@ def get_liked_cocktails(user_id):
 
     liked_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'liked_cocktails': 1})['liked_cocktails']
 
-    return {'cocktails': liked_cocktails}, 200
+    return {'cocktails': [str(liked_cocktail) for liked_cocktail in liked_cocktails]}, 200
 
 # Get Disliked Cocktails
 @app.route('/user/<user_id>/cocktails/dislikes', methods=['Get'])
@@ -431,7 +502,29 @@ def get_disliked_cocktails(user_id):
 
     disliked_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'disliked_cocktails': 1})['disliked_cocktails']
 
-    return {'cocktails': disliked_cocktails}, 200
+    return {'cocktails': [str(disliked_cocktail) for disliked_cocktail in disliked_cocktails]}, 200
+
+# Get liked / disliked status of one cocktail
+@app.route('/user/<user_id>/cocktails/like_status', methods=['POST'])
+def get_like_dislike_status(user_id):
+    cocktail_id = request.get_json()['cocktailID']
+
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
+    like_dislike_lists = user_db.find_one({'_id': ObjectId(user_id)}, {'disliked_cocktails': 1, 'liked_cocktails': 1})
+    liked_cocktails = [str(liked_cocktail) for liked_cocktail in like_dislike_lists['liked_cocktails']]
+    disliked_cocktails = [str(disliked_cocktail) for disliked_cocktail in like_dislike_lists['disliked_cocktails']]
+
+    liked_status = "None"
+    if cocktail_id in liked_cocktails:
+        liked_status = 'Liked'
+    elif cocktail_id in disliked_cocktails:
+        liked_status = 'Disliked'
+
+    return {'likeStatus': liked_status}, 200
 
 # Favorite Cocktail
 @app.route('/user/<user_id>/cocktails/favorite', methods=['POST'])
@@ -480,7 +573,28 @@ def get_favorited_cocktails(user_id):
 
     favorite_cocktails = user_db.find_one({'_id': ObjectId(user_id)}, {'favorite_cocktails': 1})['favorite_cocktails']
 
-    return {'cocktails': favorite_cocktails}, 200
+    return {'cocktails': [str(cocktail) for cocktail in favorite_cocktails] or []}, 200
+
+# Get All Glassware
+@app.route('/glassware', methods=['Get'])
+def get_all_glassware():
+    glassware_list = list(glassware_db.find({}))
+
+    # Convert ObjectID -> String for JSON
+    for glassware in glassware_list:
+        glassware['_id'] = str(glassware['_id'])
+
+    return {'glassware': glassware_list}, 200
+
+# Get Glassware Info
+@app.route('/glassware/<glassware_id>', methods=['Get'])
+def get_glassware_info(glassware_id):
+    glassware = glassware_db.find_one({'_id': ObjectId(glassware_id)})
+
+    # Convert ObjectID -> String for JSON
+    glassware['_id'] = str(glassware['_id'])
+
+    return {'glassware': glassware}, 200
 
 # Recommend ingredients
 @app.route('/user/<user_id>/ingredients/recommendations', methods=['GET'])

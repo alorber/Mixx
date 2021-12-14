@@ -10,7 +10,13 @@ import {
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const LoginSignupLayout = ({isLoggedIn, updateLoggedIn}: {isLoggedIn: boolean, updateLoggedIn: (l: boolean) => void}) => {
+type LoginSignupLayoutProps = {
+    isLoggedIn: boolean, 
+    updateLoggedIn: (l: boolean) => void,
+    checkLoggedIn: () => void
+}
+
+const LoginSignupLayout = ({isLoggedIn, updateLoggedIn, checkLoggedIn}: LoginSignupLayoutProps) => {
     const navigate = useNavigate();
     const location = useLocation()
     
@@ -20,6 +26,11 @@ const LoginSignupLayout = ({isLoggedIn, updateLoggedIn}: {isLoggedIn: boolean, u
             navigate('/')
         }
     })
+
+    // Check if auth expired
+    useEffect(() => {
+        checkLoggedIn();
+    });
 
     return (
         <Stack>

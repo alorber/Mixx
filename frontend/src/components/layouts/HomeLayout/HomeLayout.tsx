@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import ThemedButton from '../../ui/ThemedButton/ThemedButton';
 import {
     Box,
@@ -11,7 +11,17 @@ import {
     Text
     } from '@chakra-ui/react';
 
-const HomeLayout = () => {
+type HomeLayoutProps = {
+    checkLoggedIn: () => void
+}
+
+const HomeLayout = ({checkLoggedIn}: HomeLayoutProps) => {
+
+    // Check if user auth has expired
+    useEffect(() => {
+        checkLoggedIn();
+    });
+
     return (
         <Stack spacing={10} justifyContent='center'>
             {/* Intro & Sign In Button */}

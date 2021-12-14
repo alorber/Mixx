@@ -1,6 +1,7 @@
 import React from 'react';
 import StyledListItem from '../../ui/StyledListItem/StyledListItem';
 import { AddIcon, MinusIcon } from '@chakra-ui/icons';
+import { CATEGORIES_LIST, CategorizedIngredients } from '../../../services/api';
 import {
     Collapse,
     Heading,
@@ -8,18 +9,15 @@ import {
     Stack,
     useDisclosure
     } from '@chakra-ui/react';
-import {
-    CATEGORIES_LIST,
-    CategorizedIngredients, Ingredient,
-    } from '../../../services/api';
+import { Link as RouterLink } from 'react-router-dom';
 
 type IngredientsListProps = {
     ingredientsList: CategorizedIngredients,
-    addIngredient: (ingredientID: string) => void,
-    removeIngredient: (ingredientID: string) => void,
+    addIngredient?: (ingredientID: string) => void,
+    removeIngredient?: (ingredientID: string) => void,
 }
 
-const IngredientsList = ({ingredientsList, addIngredient, removeIngredient}: IngredientsListProps) => {
+const IngredientsList = ({ingredientsList, addIngredient = ()=>{}, removeIngredient= ()=>{}}: IngredientsListProps) => {
     return (
         <Stack p={8} maxW={700} h={'70%'} borderWidth={1} borderRadius={8} boxShadow="lg" borderColor="#b7e0ff "
                 overflowY={'auto'} ml='auto' mr='auto'>
@@ -39,7 +37,7 @@ const IngredientsList = ({ingredientsList, addIngredient, removeIngredient}: Ing
 
 // Category List Item
 type CategoryListItemProps = {
-    categoryIngredientsList: {[key: string]: [{name: string, id: string, owned?: boolean}]},
+    categoryIngredientsList: {[key: string]: {name: string, id: string, owned?: boolean}[]},
     category: string,
     subcategory?: string | null,
     addIngredient: (ingredientID: string) => void,
@@ -88,14 +86,23 @@ const IngredientsListItem = (
 ) => {
     return (
         <Stack spacing={4} w='100%'>
-            <Link _focus={{outline: "none"}} role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
-                    _hover={{textDecoration: "none", bg: ingredient.owned ? '#E5A5A6' : '#A8E28E'}} onClick={(e) => {e.preventDefault(); 
-                    onClick(ingredient.id)}}>
-                <StyledListItem hoverIconType={
-                    ingredient.hasOwnProperty('owned') ? (ingredient.owned ? MinusIcon : AddIcon) : undefined}>
-                    {ingredient.name}
-                </StyledListItem>
-            </Link>
+            {ingredient.hasOwnProperty('owned') ? (
+                <Link _focus={{outline: "none"}} role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
+                        _hover={{textDecoration: "none", bg: ingredient.owned ?  '#E5A5A6' : '#A8E28E'}} 
+                        onClick={(e) => {e.preventDefault(); onClick(ingredient.id)}}>
+                    <StyledListItem hoverIconType={ingredient.owned ? MinusIcon : AddIcon}>
+                        {ingredient.name}
+                    </StyledListItem>
+                </Link>
+            ) : (
+                <Link as={RouterLink} to={`/cocktails/?ingredient_id=${ingredient.id}`}  _focus={{outline: "none"}} 
+                        role={'group'} display={'block'} p={2} rounded={'md'} w={'90%'}
+                        _hover={{textDecoration: "none", bg: '#eaf6ff'}}>
+                    <StyledListItem>
+                        {ingredient.name}
+                    </StyledListItem>
+                </Link>
+            )}
         </Stack>
     );
 }

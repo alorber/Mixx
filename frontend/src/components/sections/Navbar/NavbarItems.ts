@@ -32,13 +32,9 @@ export const NAVBAR_ITEMS: Array<NavbarItem> = [
                 href: '/ingredients'
             },
             {
-                label: 'Cocktials',
+                label: 'Cocktails',
                 href: '/cocktails'
             }
         ]
     },
-    {
-        label: 'Search',
-        href: '/search'
-    }
 ] 
