@@ -8,7 +8,7 @@ import {
     Stack,
     Text
     } from '@chakra-ui/react';
-import { AddIcon, ChevronDownIcon, ChevronRightIcon, MinusIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons';
 
 type StyledListItemProps = {
     isItemDropdown?: boolean,  // Does this list item open another list

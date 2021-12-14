@@ -2,7 +2,7 @@ import App from './components/App/App';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
-import { ChakraProvider, extendTheme, theme } from '@chakra-ui/react';
+import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import './index.css';
 
 const newTheme = extendTheme({

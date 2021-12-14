@@ -46,13 +46,19 @@ export type CATEGORIES = 'Spirits' | 'Liqueurs' | 'Wines and Champagnes' | 'Beer
 export const CATEGORIES_LIST = ['Spirits', 'Liqueurs', 'Wines and Champagnes', 'Beers and Ciders', 'Mixers', 'Other'];
 export type CategorizedIngredients = {
    [key in string]: {
-       [key: string]: [{
+       [key: string]: {
            name: string,
            id: string,
            owned?: boolean
-       }]
+       }[]
    }
 };
+
+export type RecipeStep = {
+    ingredient: string,
+    quantity: string,
+    unit: string
+}
 
 export type Cocktail = {
     _id: string;
@@ -62,7 +68,24 @@ export type Cocktail = {
     img: string;
     subtitle: string | null;
     name: string;
-    ingredients: Ingredient[];
+    ingredients: RecipeStep[];
+}
+
+export type Glassware = {
+    _id: string;
+    name: string;
+}
+
+export type LikeDislikeStatus = "Liked" | "Disliked" | "None";
+
+export type CocktailBasicInfo = {
+    id: string;
+    name: string;
+    canMake?: boolean;
+}
+
+export type IngredientRecommendations = {
+    [ingredientID: string]: CocktailBasicInfo[];
 }
 
 // Functions
@@ -81,6 +104,14 @@ export function getUserID(): string {
 // Checks if user is logged in
 export function isLoggedIn(): boolean {
     return getUserID() !== '';
+}
+
+// Checks user auth
+function checkUserAuth(errorCode: number): void {
+    // If auth error, sign out
+    if(errorCode === 401) {
+        setUserID('');
+    }
 }
 
 // Signup
@@ -170,6 +201,7 @@ export async function updateEmail(newEmail: string, password: string): Promise<S
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -187,6 +219,42 @@ export async function updatePassword(oldPassword: string, newPassword: string): 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get Name
+export async function getName(): Promise<{firstName: string, lastName: string, status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/name`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {firstName: string, lastName: string} = await resp.json();
+        return {firstName: resp_data.firstName, lastName: resp_data.lastName, status: "Success"}
+    } else {
+        checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Update Name
+export async function updateName(firstName: string, lastName: string): Promise<StatusResponse> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/updateName`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: "include",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({firstName: firstName, lastName: lastName})
+    });
+
+    if(resp.ok) {
+        return {status: "Success"};
+    } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -203,6 +271,7 @@ export async function getCurrentUserIngredients(): Promise<{ingredientIDs: strin
         const resp_data: {ingredientIDs: string[]} = await resp.json();
         return {ingredientIDs: resp_data.ingredientIDs, status: "Success"}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -221,6 +290,7 @@ export async function updateUserIngredients(newIngredients: string[], removedIng
         const resp_data: {ingredientIDs: string[]} = await resp.json();
         return {ingredientIDs: resp_data.ingredientIDs, status: "Success"}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -236,12 +306,13 @@ export async function getPossibleCocktails(): Promise<{cocktails: Cocktail[], st
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
         return {cocktails: resp_data.cocktails, status: "Success"}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Get All Cocktails
-export async function getAllCocktails(): Promise<{cocktails: Cocktail[]} | Failure> {
+export async function getAllCocktails(): Promise<{cocktails: Cocktail[], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails`, {
         method: 'GET',
         credentials: "include"
@@ -249,14 +320,14 @@ export async function getAllCocktails(): Promise<{cocktails: Cocktail[]} | Failu
 
     if(resp.ok) {
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
-        return {cocktails: resp_data.cocktails}
+        return {cocktails: resp_data.cocktails, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Get Cocktail's Info
-export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Failure> {
+export async function getCocktailInfo(cocktailID: string): Promise<{cocktail: Cocktail, status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/${cocktailID}`, {
         method: 'GET',
         credentials: "include"
@@ -264,14 +335,14 @@ export async function getCocktailInfo(cocktailID: string): Promise<Cocktail | Fa
 
     if(resp.ok) {
         const resp_data: {cocktail: Cocktail} = await resp.json();
-        return resp_data.cocktail
+        return {cocktail: resp_data.cocktail, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
 }
 
 // Get Cocktails Containing Ingredient
-export async function getCocktailContaining(ingredientID: string): Promise<{cocktails: [Cocktail]} | Failure> {
+export async function getCocktailContaining(ingredientID: string): Promise<{cocktails: [Cocktail], status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/cocktails/containing/${ingredientID}`, {
         method: 'GET',
         credentials: "include"
@@ -279,7 +350,23 @@ export async function getCocktailContaining(ingredientID: string): Promise<{cock
 
     if(resp.ok) {
         const resp_data: {cocktails: [Cocktail]} = await resp.json();
-        return {cocktails: resp_data.cocktails}
+        return {cocktails: resp_data.cocktails, status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get All Ingredients
+export async function getAllIngredients(): Promise<{ingredients: Ingredient[], status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/ingredients`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {ingredients: Ingredient[]} = await resp.json();
+        return {ingredients: resp_data.ingredients, status: "Success"}
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
@@ -301,19 +388,39 @@ export async function getCategorizedIngredients(): Promise<{ingredients: Categor
     }
 }
 
+// Get Ingredients' Info (from IDs)
+export async function getIngredientsInfo(ingredientIDs: string[]): Promise<{ingredients: Ingredient[], status: "Success"} | Failure>{
+    const resp = await fetch(`${BACKEND_URL}/ingredients/some`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: "include",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ingredientIDs: ingredientIDs})
+    });
+
+    if(resp.ok) {
+        const resp_data: {ingredients: Ingredient[]} = await resp.json();
+        return {ingredients: resp_data.ingredients, status: "Success"}
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+
 // Like Cocktail
 export async function likeCocktail(cocktailID: string): Promise<StatusResponse> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/like`, {
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -324,13 +431,14 @@ export async function removeLikedCocktail(cocktailID: string): Promise<StatusRes
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -341,13 +449,14 @@ export async function dislikeCocktail(cocktailID: string): Promise<StatusRespons
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -358,13 +467,14 @@ export async function removeDislikedCocktail(cocktailID: string): Promise<Status
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -377,9 +487,10 @@ export async function getLikedCocktails(): Promise<{cocktails: Cocktail[]} | Fai
     });
 
     if(resp.ok) {
-        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        const resp_data: {cocktails: Cocktail[]} = await resp.json();
         return {cocktails: resp_data.cocktails}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -392,11 +503,33 @@ export async function getDislikedCocktails(): Promise<{cocktails: Cocktail[]} | 
     });
 
     if(resp.ok) {
-        const resp_data: {cocktails: [Cocktail]} = await resp.json();
+        const resp_data: {cocktails: Cocktail[]} = await resp.json();
         return {cocktails: resp_data.cocktails}
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
+}
+
+// Get liked / disliked status of one cocktail
+export async function getLikeDislikeStatus(cocktailID: string): 
+        Promise<{likeStatus: LikeDislikeStatus, status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/like_status`, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: "include",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({cocktailID: cocktailID})
+    });
+    
+    if(resp.ok) {
+        const resp_data: {likeStatus: LikeDislikeStatus} = await resp.json();
+        return {likeStatus: resp_data.likeStatus, status: "Success"}
+    } else {
+        checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+
 }
 
 // Favorite Cocktail
@@ -405,13 +538,14 @@ export async function favoriteCocktail(cocktailID: string): Promise<StatusRespon
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -422,13 +556,14 @@ export async function unfavoriteCocktail(cocktailID: string): Promise<StatusResp
         method: 'POST',
         mode: 'cors',
         credentials: "include",
-        headers: {'Content-Type': 'application/jaon'},
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({cocktailID: cocktailID})
     });
 
     if(resp.ok) {
         return {status: "Success"};
     } else {
+        checkUserAuth(resp.status);
         return {errorCode: resp.status, status: "Failure"};
     }
 }
@@ -443,6 +578,67 @@ export async function getFavoritedCocktails(): Promise<{cocktailIDs: string[], s
     if(resp.ok) {
         const resp_data: {cocktails: [string]} = await resp.json();
         return {cocktailIDs: resp_data.cocktails, status: "Success"}
+    } else {
+        checkUserAuth(resp.status);
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get All Glassware
+export async function getAllGlassware(): Promise<{glassware: Glassware[], status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/glassware`, {
+        method: 'GET',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {glassware: Glassware[], status: "Success"} = await resp.json();
+        return {glassware: resp_data.glassware, status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get Glassware Info
+export async function getGlasswareInfo(glasswareID: string): Promise<{glassware: Glassware, status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/glassware/${glasswareID}`, {
+        method: 'GET',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {glassware: Glassware, status: "Success"} = await resp.json();
+        return {glassware: resp_data.glassware, status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get Ingredient Recommendations
+export async function getIngredientRecommendations(): Promise<{recommendations: IngredientRecommendations, status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/recommendations`, {
+        method: 'GET',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {recommendations: IngredientRecommendations, status: "Success"} = await resp.json();
+        return {recommendations: resp_data.recommendations, status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get Cocktail Recommendations
+export async function getCocktailRecommendations(): Promise<{recommendations: CocktailBasicInfo[], status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/recommendations`, {
+        method: 'GET',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {recommendations: CocktailBasicInfo[], status: "Success"} = await resp.json();
+        return {recommendations: resp_data.recommendations, status: "Success"};
     } else {
         return {errorCode: resp.status, status: "Failure"};
     }
