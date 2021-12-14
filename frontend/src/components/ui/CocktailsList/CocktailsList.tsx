@@ -34,7 +34,7 @@ type CocktailsListItemProps = {
     onFavoriteClick: (cocktailID: string) => void
 }
 
-const CocktailsListItem = ({cocktailID, cocktailName, favoritesList, onFavoriteClick}: CocktailsListItemProps) => {
+export const CocktailsListItem = ({cocktailID, cocktailName, favoritesList, onFavoriteClick}: CocktailsListItemProps) => {
     return (
         <Stack direction='row'>
             {favoritesList !== null && (

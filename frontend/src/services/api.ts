@@ -78,11 +78,14 @@ export type Glassware = {
 
 export type LikeDislikeStatus = "Liked" | "Disliked" | "None";
 
+export type CocktailBasicInfo = {
+    id: string;
+    name: string;
+    canMake?: boolean;
+}
+
 export type IngredientRecommendations = {
-    [ingredientID: string]: {
-        id: string;
-        name: string;
-    }[];
+    [ingredientID: string]: CocktailBasicInfo[];
 }
 
 // Functions
@@ -611,7 +614,7 @@ export async function getGlasswareInfo(glasswareID: string): Promise<{glassware:
     }
 }
 
-// Get Cocktail Recommendations
+// Get Ingredient Recommendations
 export async function getIngredientRecommendations(): Promise<{recommendations: IngredientRecommendations, status: "Success"} | Failure> {
     const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/ingredients/recommendations`, {
         method: 'GET',
@@ -620,6 +623,21 @@ export async function getIngredientRecommendations(): Promise<{recommendations: 
 
     if(resp.ok) {
         const resp_data: {recommendations: IngredientRecommendations, status: "Success"} = await resp.json();
+        return {recommendations: resp_data.recommendations, status: "Success"};
+    } else {
+        return {errorCode: resp.status, status: "Failure"};
+    }
+}
+
+// Get Cocktail Recommendations
+export async function getCocktailRecommendations(): Promise<{recommendations: CocktailBasicInfo[], status: "Success"} | Failure> {
+    const resp = await fetch(`${BACKEND_URL}/user/${getUserID()}/cocktails/recommendations`, {
+        method: 'GET',
+        credentials: "include"
+    });
+
+    if(resp.ok) {
+        const resp_data: {recommendations: CocktailBasicInfo[], status: "Success"} = await resp.json();
         return {recommendations: resp_data.recommendations, status: "Success"};
     } else {
         return {errorCode: resp.status, status: "Failure"};

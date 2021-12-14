@@ -79,6 +79,14 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         }
     }
 
+    // Loads Recommended Ingredients
+    const loadRecommendations = async () => {
+        const resp = await getIngredientRecommendations();
+        if(resp.status === "Success") {
+            setIngredientRecommendations(resp.recommendations);
+        }
+    }
+
     const loadIngredientsLists = async () => {
         checkLoggedIn();
         getIngredientsCategorized(setAllIngredientsErrorCode, 
@@ -89,10 +97,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         getUserIngredients(setUserIngredientsErrorCode, 
             (ingredients: string[]) => {setUserIngredientIDs(ingredients)},
             checkLoggedIn);
-        const resp = await getIngredientRecommendations();
-        if(resp.status === "Success") {
-            setIngredientRecommendations(resp.recommendations);
-        }
+        await loadRecommendations();
     }
 
     // Load list on pageload
@@ -139,10 +144,7 @@ const MyIngredientsLayout = ({checkLoggedIn}: MyIngredientsLayoutProps) => {
         await saveIngredients(checkLoggedIn, removedIngredientIDs, setRemovedIngredientIDs, 
             addedIngredientIDs, setAddedIngredientIDs, setUserIngredientIDs, 
             setIsSaving, setIsLoading, setUserIngredientsErrorCode);
-        const resp = await getIngredientRecommendations();
-        if(resp.status === "Success") {
-            setIngredientRecommendations(resp.recommendations);
-        }
+        await loadRecommendations();
     }
 
     return isSaving ? (

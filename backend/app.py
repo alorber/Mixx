@@ -599,6 +599,11 @@ def get_glassware_info(glassware_id):
 # Recommend ingredients
 @app.route('/user/<user_id>/ingredients/recommendations', methods=['GET'])
 def get_recommended_ingredients(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+    
     ingredient_recommendations = {}
     all_cocktails = list(cocktail_db.find({}))
     ingredientIDs = user_db.find_one({'_id': ObjectId(user_id)}).get('ingredients', [])
@@ -618,8 +623,13 @@ def get_recommended_ingredients(user_id):
     return {'recommendations': ingredient_recommendations}, 200
 
 # Recommend cocktails based on liked recipes
-@app.route('/user/<user_id>/ingredients/recommendations', methods=['GET'])
+@app.route('/user/<user_id>/cocktails/recommendations', methods=['GET'])
 def get_recommended_cocktails(user_id):
+    # Check authorization
+    if not is_auth_user(user_id):
+        # ERROR: Unauthorized
+        return {}, 401
+
     favorites = user_db.find_one({'_id': ObjectId(user_id)}).get('favorite_cocktails', []) # Get user's favorite cocktails
     all_cocktails = list(cocktail_db.find({}))
     favorite_ingredients = {}
@@ -639,9 +649,9 @@ def get_recommended_cocktails(user_id):
             ingredient_ = ingredient['ingredient']
             cocktail_list.append(ingredient_)
         ingredient_intersection = set(cocktail_list).intersection(set(favorite_ingredients))  # Get cocktails that contain combos of these ingredients
-        if (len(ingredient_intersection) > 3):
-            cocktail_recommendations.append(cocktail.get('_id'))
-    return cocktail_recommendations
+        if (len(ingredient_intersection) > 2 and cocktail.get('_id') not in favorites):
+            cocktail_recommendations.append({'id': str(cocktail['_id']), 'name': cocktail['name']})
+    return {'recommendations': cocktail_recommendations}, 200
 
 if __name__ == "__main__":
     app.run(debug=True)

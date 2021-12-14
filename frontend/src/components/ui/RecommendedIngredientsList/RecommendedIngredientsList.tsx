@@ -1,7 +1,7 @@
 import React from 'react';
 import StyledListItem from '../StyledListItem/StyledListItem';
 import { buildSelectedIngredientDict } from '../../../functions/ingredients';
-import { Ingredient, IngredientRecommendations } from '../../../services/api';
+import { CocktailBasicInfo, Ingredient, IngredientRecommendations } from '../../../services/api';
 import {
     Button,
     Collapse,
@@ -78,7 +78,7 @@ export default RecommendedIngredientsList;
 // Recommended Ingredient List Item
 type RecommendedIngredientsListItemProps = {
     ingredientName: string,
-    cocktails: {id: string, name: string}[]
+    cocktails: CocktailBasicInfo[]
 }
 const RecommendedIngredientsListItem = ({ingredientName, cocktails}: RecommendedIngredientsListItemProps) => {
     const { isOpen, onToggle } = useDisclosure();

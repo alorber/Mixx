@@ -1,5 +1,6 @@
 import CocktailsList from '../../ui/CocktailsList/CocktailsList';
 import React, { useEffect, useState } from 'react';
+import RecommendedCocktailsList from '../../ui/RecommendedCocktailsList/RecommendedCocktailsList';
 import SearchBar from '../../ui/SearchBar/SearchBar';
 import { Box, Heading, Stack } from '@chakra-ui/react';
 import {
@@ -13,6 +14,8 @@ import { buildGlasswareDict } from '../../../functions/glassware';
 import { buildIngredientDict } from '../../../functions/ingredients';
 import {
     Cocktail,
+    CocktailBasicInfo,
+    getCocktailRecommendations,
     getPossibleCocktails,
     Glassware,
     Ingredient
@@ -32,6 +35,7 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
     const [searchString, setSearchString] = useState<string>('');
     const [searchTypes, setSearchTypes]  = useState<SearchType[]>(["CocktailName", "Ingredient", "Glassware"]);
     const [searchResults, setSearchResults] = useState<Cocktail[] | null>(null);
+    const [recommendedCocktails, setRecommendedCocktails] = useState<CocktailBasicInfo[] | null>(null);
 
     const getCocktails = async () => {
         const resp = await getPossibleCocktails();
@@ -56,12 +60,22 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
         }
     }
 
+    // Loads Cocktail Recommendations
+    const loadRecommendations = async () => {
+        const resp = await getCocktailRecommendations();
+        if(resp.status === "Success") {
+            setRecommendedCocktails(resp.recommendations);
+            console.log(resp.recommendations)
+        }
+    }
+
     // Load everything
     const loadLists = async () => {
         await getCocktails();
         await buildIngredientDict(setErrorCode, setIngredientsDict);
         await buildGlasswareDict(setErrorCode, setGlasswareDict);
         await getSavedCocktails(checkLoggedIn, setFavoriteCocktailsList, setErrorCode); 
+        await loadRecommendations();
         loadSearchResults();
         setIsLoading(false);
     }
@@ -106,6 +120,12 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
                             onFavoriteClick={onClickFavorite}/>
                     </Box> 
                 </Stack>
+            )}
+            {recommendedCocktails !== null && (
+                <Stack h='100%' w='100%'>
+                    <RecommendedCocktailsList recommendationsList={recommendedCocktails} favoritesList={favoriteCocktailsList}
+                        toggleFavorite={onClickFavorite} />
+                </Stack>  
             )}
         </Stack>
     );
