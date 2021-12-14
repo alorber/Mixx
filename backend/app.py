@@ -630,11 +630,13 @@ def get_recommended_cocktails(user_id):
         # ERROR: Unauthorized
         return {}, 401
 
-    favorites = user_db.find_one({'_id': ObjectId(user_id)}).get('favorite_cocktails', []) # Get user's favorite cocktails
+    user_resp = user_db.find_one({'_id': ObjectId(user_id)})
+    liked_cocktails = user_resp.get('liked_cocktails', [])
+    favorite_cocktails = user_resp.get('favorite_cocktails', [])
     all_cocktails = list(cocktail_db.find({}))
     favorite_ingredients = {}
     cocktail_recommendations = []
-    for cocktail in favorites:
+    for cocktail in liked_cocktails:
         ingredients = cocktail_db.find_one({'_id': cocktail}).get('ingredients', []) # Get ingredients for each cocktail
         for ingredient in ingredients:
             ingrdient_ = ingredient['ingredient']
@@ -649,7 +651,8 @@ def get_recommended_cocktails(user_id):
             ingredient_ = ingredient['ingredient']
             cocktail_list.append(ingredient_)
         ingredient_intersection = set(cocktail_list).intersection(set(favorite_ingredients))  # Get cocktails that contain combos of these ingredients
-        if (len(ingredient_intersection) > 2 and cocktail.get('_id') not in favorites):
+        if (len(ingredient_intersection) > 2 and cocktail.get('_id') not in favorite_cocktails \
+            and cocktail.get('_id') not in liked_cocktails):
             cocktail_recommendations.append({'id': str(cocktail['_id']), 'name': cocktail['name']})
     return {'recommendations': cocktail_recommendations}, 200
 
