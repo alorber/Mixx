@@ -65,7 +65,6 @@ const MyCocktailsLayout = ({checkLoggedIn}: MyCocktailsLayoutProps) => {
         const resp = await getCocktailRecommendations();
         if(resp.status === "Success") {
             setRecommendedCocktails(resp.recommendations);
-            console.log(resp.recommendations)
         }
     }
 

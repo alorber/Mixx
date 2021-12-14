@@ -624,12 +624,40 @@ def get_recommended_ingredients(user_id):
 
 # Recommend cocktails based on liked recipes
 @app.route('/user/<user_id>/cocktails/recommendations', methods=['GET'])
-def get_recommended_cocktails(user_id):
+def get_recommended_cocktails_by_users(user_id):
     # Check authorization
     if not is_auth_user(user_id):
         # ERROR: Unauthorized
         return {}, 401
 
+    user_resp = user_db.find_one({'_id': ObjectId(user_id)})
+    liked = user_resp.get('liked_cocktails', [])
+    disliked = user_resp.get('disliked_cocktails', [])
+    all_users = list(user_db.find({}))
+
+    common_likes = {}
+    for user in all_users:
+        user_liked = user.get('liked_cocktails', [])
+        if user.get('_id') != user_id:
+            cocktail_interseciton = set(user_liked).intersection(set(liked)) 
+            common_likes[user.get('_id')] = len(cocktail_interseciton)
+
+    most_common = max(common_likes, key=common_likes.get)
+    most_common_user_liked = user_db.find_one({'_id': ObjectId(most_common)}).get('liked_cocktails', [])
+    cocktail_difference = set(most_common_user_liked).difference(set(liked))
+
+    if len(cocktail_difference) != 0:
+        results = cocktail_difference.difference(disliked)
+        recommendations = []
+        for cocktail in recommendations:
+            cocktail_info = cocktail_db.find_one({'_id': cocktail})
+            recommendations.append({'id': str(cocktail_info['_id']), 'name': cocktail_info['name']})
+    else:
+        recommendations = get_recommended_cocktails(user_id)
+
+    return {'recommendations': recommendations}, 200
+
+def get_recommended_cocktails(user_id):
     user_resp = user_db.find_one({'_id': ObjectId(user_id)})
     liked_cocktails = user_resp.get('liked_cocktails', [])
     favorite_cocktails = user_resp.get('favorite_cocktails', [])
@@ -654,29 +682,7 @@ def get_recommended_cocktails(user_id):
         if (len(ingredient_intersection) > 2 and cocktail.get('_id') not in favorite_cocktails \
             and cocktail.get('_id') not in liked_cocktails):
             cocktail_recommendations.append({'id': str(cocktail['_id']), 'name': cocktail['name']})
-    return {'recommendations': cocktail_recommendations}, 200
-
-  def get_recommended_cocktails_by_users(user_id):
-    liked = user_db.find_one({'_id': ObjectId(user_id)}).get('liked_cocktails', [])
-    disliked = user_db.find_one({'_id': ObjectId(user_id)}).get('disliked_cocktails', [])
-    all_users = list(user_db.find({}))
-
-    common_likes = {}
-    for user in all_users:
-        user_liked = user.get('liked_cocktails', [])
-        if user.get('_id') != user_id:
-            cocktail_interseciton = set(user_liked).intersection(set(liked))  # Get cocktails that contain combos of these ingredients
-            common_likes[user.get('_id')] = len(cocktail_interseciton)
-
-        most_common = max(common_likes, key=common_likes.get)
-        most_common_user_liked = user_db.find_one({'_id': ObjectId(most_common)}).get('liked_cocktails', [])
-        cocktail_difference = set(most_common_user_liked).difference(set(liked))
-
-        if cocktail_difference != []:
-            recommendations = cocktail_difference.difference(disliked)
-        else recommendations = get_recommended_cocktails_by_ingredients()
-
-    return(list(recommendations))
+    return cocktail_recommendations
 
 
 if __name__ == "__main__":
