@@ -81,7 +81,6 @@ export type LikeDislikeStatus = "Liked" | "Disliked" | "None";
 export type CocktailBasicInfo = {
     id: string;
     name: string;
-    canMake?: boolean;
 }
 
 export type IngredientRecommendations = {

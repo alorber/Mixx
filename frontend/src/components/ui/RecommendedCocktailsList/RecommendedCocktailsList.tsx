@@ -64,7 +64,7 @@ const RecommendedCocktailsList = ({recommendationsList, favoritesList, toggleFav
                         overflowY={'auto'} style={{marginLeft: 'auto', marginRight: 'auto'}}>
                     {shownRecommendations.map((cocktail: CocktailBasicInfo) => (
                         <CocktailsListItem cocktailID={cocktail.id} cocktailName={cocktail.name}
-                            favoritesList={favoritesList} onFavoriteClick={toggleFavorite} />
+                            favoritesList={favoritesList} onFavoriteClick={toggleFavorite} key={cocktail.id} />
                     ))}
                 </Stack>
             </Stack>
