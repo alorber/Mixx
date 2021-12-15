@@ -642,6 +642,9 @@ def get_recommended_cocktails_by_users(user_id):
             cocktail_interseciton = set(user_liked).intersection(set(liked)) 
             common_likes[user.get('_id')] = len(cocktail_interseciton)
 
+    if(len(common_likes.keys()) == 0):
+        return {'recommendations': get_recommended_cocktails(user_id)}, 200
+
     most_common = max(common_likes, key=common_likes.get)
     most_common_user_liked = user_db.find_one({'_id': ObjectId(most_common)}).get('liked_cocktails', [])
     cocktail_difference = set(most_common_user_liked).difference(set(liked))
@@ -649,7 +652,7 @@ def get_recommended_cocktails_by_users(user_id):
     if len(cocktail_difference) != 0:
         results = cocktail_difference.difference(disliked)
         recommendations = []
-        for cocktail in recommendations:
+        for cocktail in results:
             cocktail_info = cocktail_db.find_one({'_id': cocktail})
             recommendations.append({'id': str(cocktail_info['_id']), 'name': cocktail_info['name']})
     else:
@@ -683,7 +686,6 @@ def get_recommended_cocktails(user_id):
             and cocktail.get('_id') not in liked_cocktails):
             cocktail_recommendations.append({'id': str(cocktail['_id']), 'name': cocktail['name']})
     return cocktail_recommendations
-
 
 if __name__ == "__main__":
     app.run(debug=True)
