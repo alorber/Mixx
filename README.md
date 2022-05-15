@@ -1,7 +1,7 @@
 # Mixx
 ###### A home bartender's best friend
 
-## Table of Conents
+## Table of Contents
 1. [Introduction](#introduction)
 
 2. [Features](#features)
